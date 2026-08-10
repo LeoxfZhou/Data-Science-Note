@@ -1,0 +1,25 @@
+# macOS Finder metadata is regenerated automatically and creates noisy commits.
+.DS_Store
+**/.DS_Store
+
+# Obsidian workspace state records open tabs and local UI layout, not note content.
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache/
+.trash/
+
+# Obsidian Git may generate machine-specific authentication helpers and runtime data.
+.obsidian/plugins/obsidian-git/obsidian_askpass.sh
+.obsidian/plugins/obsidian-git/data.json
+
+# Python environments and caches should be rebuilt from dependency files.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Temporary editor and operating-system files.
+*.tmp
+*.swp
+*~
