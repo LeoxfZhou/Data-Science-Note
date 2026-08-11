@@ -14,7 +14,7 @@ source:
 
 # 面向对象编程（Object-Oriented Programming）
 ## 面向对象编程 (Object-Oriented Programming)
-### 结构化补充（Structured Supplement）：什么时候使用类
+### 什么时候使用类
 
 类适合把**状态**和操作这些状态的**行为**组织在一起。只有几个无状态步骤时，普通函数 (Function)通常更简单。
 
@@ -47,7 +47,7 @@ run.advance()
 print(run.progress)  # 0.1
 ```
 
-### 结构化补充（Structured Supplement）：常见误区
+### 常见误区
 
 - 不要在 `__init__` 中调用可能被子类重写、且依赖子类未初始化状态的方法。
 - 不要把每段逻辑都包装成类；无状态转换使用函数 (Function)更直接。
@@ -269,7 +269,7 @@ Teacher.publish()
 ```
 ### 四、 面向对象基本概念 (Basic Concepts of OOP)
 #### 1. 类与对象 (Class and Object)
-##### 结构化补充（Structured Supplement）：类对象 (Class Object)与实例对象 (Instance Object)
+##### 类对象 (Class Object)与实例对象 (Instance Object)
 
 ```python
 class Dataset:
@@ -291,7 +291,7 @@ class BadDataset:
     samples = []  # 所有实例会共享同一个列表，容易产生隐蔽的数据串扰。
 ```
 
-##### 结构化补充（Structured Supplement）：实例方法 (Instance Method)、类方法 (Class Method)与静态方法 (Static Method)
+##### 实例方法 (Instance Method)、类方法 (Class Method)与静态方法 (Static Method)
 
 ```python
 class ModelConfig:
@@ -313,7 +313,7 @@ class ModelConfig:
         return 0.0 < value < 1.0
 ```
 
-##### 结构化补充（Structured Supplement）：数据类（Dataclass）
+##### 数据类（Dataclass）
 
 对象主要用于保存数据时，`dataclass` 能减少样板代码：
 
@@ -343,7 +343,7 @@ class Student(object):
         self.age = age
 ```
 #### 2. 魔术方法 (Magic Methods)
-##### 结构化补充（Structured Supplement）：`__new__`、`__init__` 与常用魔术方法 (Magic Method)
+##### `__new__`、`__init__` 与常用魔术方法 (Magic Method)
 
 - `__new__` 负责创建并返回实例，很少需要自己重写。
 - `__init__` 在实例创建后初始化属性，不应返回值 (Return Value)。
@@ -372,7 +372,7 @@ class Batch:
 1. 每当实例化时，先自动调用魔术方法 (Magic Method) `__new__(cls, *args, **kwargs)`，把要实例化的类对象 (即：`Student`) 作为实参 (Actual Argument)传递给形参 (Formal Parameter) `cls`，并把实例化时传入的其他实参 (即：`'张三', 28`) 传递给形参 (Formal Parameter) `args`, `*kwargs`，然后 `__new__` 方法根据 `cls` 创建出一个对应的实例对象 (Instance Object)，并返回该实例对象 (Instance Object)。
 1. 再自动调用魔术方法 (Magic Method) `__init__(self, name, age)`，把 `__new__` 方法创建的实例对象 (Instance Object)作为实参 (Actual Argument)传递给形参 (Formal Parameter) `self`，实例化时传入的其他实参 (Actual Argument)分别传给形参 (Formal Parameter) `name`, `age`，然后 `__init__` 方法再对 `self` 进行属性定制 (inplace 操作)。
 #### 3. 属性调用与操作 (Attribute Operations)
-##### 结构化补充（Structured Supplement）：对象属性字典 (Attribute Dictionary) 与 `__slots__`
+##### 对象属性字典 (Attribute Dictionary) 与 `__slots__`
 
 普通实例通常把属性保存在 `__dict__` 中，因此可以动态增加属性。
 
@@ -456,7 +456,7 @@ print(hasattr(stu1, 'name'))
 # 输出说明: 按 `print()` 的出现顺序输出上方已构造对象的当前值；若输出包含内存地址 (Memory Address)、随机数 (Random Number)、平台路径 (Path)或版本 (Version)信息，具体字符可能随运行环境变化。
 ```
 ### 五、 封装 (Encapsulation)
-#### 结构化补充（Structured Supplement）：封装 (Encapsulation)与属性
+#### 封装 (Encapsulation)与属性
 
 Python 主要依赖约定，不提供严格的私有访问权限：
 
@@ -512,7 +512,7 @@ p1.call_sleep()
 # 张三睡觉了!
 ```
 ### 六、 继承 (Inheritance)
-#### 结构化补充（Structured Supplement）：继承 (Inheritance)与组合 (Composition)
+#### 继承 (Inheritance)与组合 (Composition)
 
 继承 (Inheritance)表达“是一个（is-a）”：
 
@@ -547,7 +547,7 @@ class PredictionService:
 
 `isinstance(object, Class)` 会考虑继承 (Inheritance)关系；`type(object) is Class` 只匹配精确类型。
 
-#### 结构化补充（Structured Supplement）：抽象基类 (Abstract Base Class, ABC)
+#### 抽象基类 (Abstract Base Class, ABC)
 
 抽象基类 (Abstract Base Class, ABC) 可以规定子类必须实现的接口 (Interface)。
 
@@ -568,7 +568,7 @@ class SumPredictor(Predictor):
 
 没有实现全部抽象方法 (Abstract Methods) 的子类不能被实例化。这适合框架边界，但小项目不应为了形式而创建大量抽象层。
 
-#### 结构化补充（Structured Supplement）：协议 (Protocol) 与鸭子类型 (Duck Typing)
+#### 协议 (Protocol) 与鸭子类型 (Duck Typing)
 
 Python 更常见的是鸭子类型 (Duck Typing)：对象只要提供所需行为即可，不强制继承 (Inheritance)某个父类。
 
@@ -589,9 +589,12 @@ def evaluate(model: SupportsPredict, features: list[float]) -> float:
 
 协议 (Protocol) 主要服务静态类型检查 (Static Type Checking)，运行时不会自动验证每个对象。
 
-#### 结构化补充（Structured Supplement）：多重继承 (Multiple Inheritance) 与方法解析顺序 (Method Resolution Order, MRO)
+#### 多重继承 (Multiple Inheritance) 与方法解析顺序 (Method Resolution Order, MRO)
 
 Python 根据方法解析顺序 (Method Resolution Order, MRO) 查找属性和方法：
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 多重继承像一个类同时沿多条家族关系寻找方法。MRO 是 Python 预先排好的唯一查找路线，`super()` 会沿这条路线继续走，而不是简单地只找“父类”。所有类协作调用 `super()`，才能避免菱形继承中同一祖先被重复执行或被跳过。
 
 ```python
 class A:
@@ -673,7 +676,7 @@ print(issubclass(A, A)) # True (把自己视作自己的子类)
 ```
 
 ## 进阶补充与核对（Advanced Supplements and Verification）
-### 结构化补充（Structured Supplement）：完成检查
+### 完成检查
 
 - [ ] 能区分类属性 (Class Attribute)与实例属性 (Instance Attribute)。
 - [ ] 能说明实例方法 (Instance Method)、类方法 (Class Method)和静态方法 (Static Method)的适用场景。
@@ -681,7 +684,7 @@ print(issubclass(A, A)) # True (把自己视作自己的子类)
 - [ ] 能根据关系选择继承 (Inheritance)或组合 (Composition)。
 - [ ] 知道什么时候使用 `dataclass`，什么时候普通函数 (Function)更合适。
 
-### 结构化补充（Structured Supplement）：参考资料
+### 参考资料
 
 - [Python 官方教程：Classes](https://docs.python.org/3/tutorial/classes.html)
 - [Python 标准库：dataclasses](https://docs.python.org/3/library/dataclasses.html)

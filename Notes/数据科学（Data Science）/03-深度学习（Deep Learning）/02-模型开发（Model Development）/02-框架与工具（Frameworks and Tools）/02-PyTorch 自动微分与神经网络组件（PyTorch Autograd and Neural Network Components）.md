@@ -291,7 +291,10 @@ print(nn.BCEWithLogitsLoss()(logits, target).item())  # 约 0.3616
 4. `loss.backward()`：反向传播并累积参数梯度。
 5. `optimizer.step()`：由优化算法更新参数。
 ### 7.2 手工梯度下降（Manual Gradient Descent）
-- 原稿的公式 `w = w - learning_rate * gradient` 正确，但不应使用 `x.data = ...` 绕过自动微分安全检查。
+- 手工梯度下降使用 `w = w - learning_rate * gradient`；参数更新应放在 `torch.no_grad()` 中，不得通过 `x.data = ...` 绕过自动微分安全检查。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 自动微分像在每次张量运算旁记录“这个结果由谁算出来”。调用 `backward()` 时，PyTorch 沿记录反向追踪并套用链式法则，把每个叶子参数对损失的影响累积到 `.grad`。`no_grad()` 则是在明确告诉系统：这段操作只是更新参数，不需要再记进下一张计算图。
 - 手工更新应放入 `torch.no_grad()`，并保持参数对象身份不变；更新后再清除梯度。
 ```python
 import torch

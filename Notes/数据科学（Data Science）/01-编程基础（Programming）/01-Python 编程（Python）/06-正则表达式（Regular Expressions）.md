@@ -15,7 +15,7 @@ source:
 # 正则表达式（Regular Expressions）
 ## 正则表达式 (Regular Expression)
 ### 一、 简介 (Introduction)
-#### 结构化补充（Structured Supplement）：什么时候使用正则
+#### 什么时候使用正则
 
 正则表达式 (Regular Expression)适合描述**文本模式**，例如验证固定格式、提取日志字段和批量替换。
 
@@ -32,12 +32,15 @@ if match:
     print(match.group())  # 2026-08-10
 ```
 
-#### 结构化补充（Structured Supplement）：边界与性能
+#### 边界与性能
 
 - 用户输入如果只是普通文本，应先用 `re.escape()` 转义，再拼入模式。
 - 避免含糊的嵌套量词 (Quantifier)，例如 `(a+)+`，长输入可能造成灾难性回溯 (Backtracking)。
 - 复杂模式应先 `re.compile()`，并为合法、非法、空字符串 (String)和极长字符串 (String)建立测试。
 - HTML、JSON、编程语言 (Programming Language)等结构化内容应使用专用解析器，不要用正则完整解析。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 回溯型正则引擎会在匹配失败时退回之前的分岔点，换一种切分方式再试。嵌套量词会制造大量相似分岔，输入越长，尝试组合可能成倍增加，因此一个看似很短的模式也可能占满 CPU。
 
 ```python
 import re
@@ -48,7 +51,7 @@ def contains_literal(text: str, keyword: str) -> bool:
     return re.search(re.escape(keyword), text) is not None
 ```
 
-#### 结构化补充（Structured Supplement）：调试与测试正则
+#### 调试与测试正则
 
 每个重要模式至少测试：
 
@@ -102,7 +105,7 @@ def isvalid(email):
 许多语言都支持利用正则表达式 (Regular Expression)进行字符串 (String)操作，Python 也不例外，通过内置的 `re` 模块 (Module)实现。
 ---
 ### 二、 字符匹配 (Character Matching)
-#### 结构化补充（Structured Supplement）：Unicode (Unicode) 与边界
+#### Unicode (Unicode) 与边界
 
 Python 3 的字符串 (String)模式默认按 Unicode (Unicode) 处理，因此 `\w` 不只匹配 ASCII 英文字母、数字和下划线，也可能匹配中文等 Unicode 单词字符。
 
@@ -136,7 +139,7 @@ print(p.search("atest123b"))
 ```
 
 #### 2. 特殊字符 / 元字符 (Meta Characters)
-##### 结构化补充（Structured Supplement）：常用元字符 (Metacharacter)
+##### 常用元字符 (Metacharacter)
 
 | 模式 | 含义 |
 |---|---|
@@ -164,7 +167,7 @@ print(p.search("atest123b"))
 
 量词 (Quantifier)默认是贪婪的；在后面加 `?` 可以改为非贪婪，例如 `.*?`。
 
-##### 结构化补充（Structured Supplement）：前后查找 (Lookarounds)
+##### 前后查找 (Lookarounds)
 
 前后查找 (Lookaround)只检查上下文，不把上下文字符包含进最终匹配。
 
@@ -650,7 +653,7 @@ print(p.findall("[]"))
 ```
 
 #### 4. `(...)` 捕获分组 (Capturing Group)
-##### 结构化补充（Structured Supplement）：提取数据
+##### 提取数据
 ###### 命名分组 (Named Group)
 
 ```python
@@ -691,7 +694,7 @@ for match in re.finditer(r"\w+=([0-9.]+)", text):
 > [!note]
 > `findall()` 的返回结构受捕获分组 (Capturing Group)影响：无分组返回完整匹配，一个分组返回字符串 (String)列表 (List)，多个分组返回元组 (Tuple)列表 (List)。
 
-##### 结构化补充（Structured Supplement）：分组 (Groups) 与反向引用 (Backreferences)
+##### 分组 (Groups) 与反向引用 (Backreferences)
 ###### 捕获分组 (Capturing Group)
 
 ```python
@@ -777,7 +780,7 @@ print(m.span(2))
 
 ---
 ### 三、 Pattern 对象方法 (Pattern Object Methods)
-#### 结构化补充（Structured Supplement）：`search`、`match` 与 `fullmatch`
+#### `search`、`match` 与 `fullmatch`
 
 ```python
 import re
@@ -801,7 +804,7 @@ def is_valid_username(username: str) -> bool:
     return USERNAME_PATTERN.fullmatch(username) is not None
 ```
 
-#### 结构化补充（Structured Supplement）：替换与分割
+#### 替换与分割
 
 ```python
 import re
@@ -832,7 +835,7 @@ def normalize_number(match: re.Match) -> str:
 result = re.sub(r"\d+(?:\.\d+)?", normalize_number, "loss=1 accuracy=0.9234")
 ```
 
-#### 结构化补充（Structured Supplement）：Pattern 对象 (Pattern Object) 与 Match 对象 (Match Object)
+#### Pattern 对象 (Pattern Object) 与 Match 对象 (Match Object)
 ##### Pattern 常用方法
 
 | 方法 | 用途 |
@@ -964,7 +967,7 @@ print(p.sub(r"\1XX", "123 456"))  # 输出: 1XX 4XX
 - `re.split(pattern, string, maxsplit=0, flags=0)`
 - `re.sub(pattern, repl, string, count=0, flags=0)`
 ### 编译模式
-#### 结构化补充（Structured Supplement）：常用标志
+#### 常用标志
 
 | 标志 | 作用 |
 |---|---|
@@ -1035,7 +1038,7 @@ print(p2.search("\nbc"))
 ```
 
 ## 进阶补充与核对（Advanced Supplements and Verification）
-### 结构化补充（Structured Supplement）：完成检查
+### 完成检查
 
 - [ ] 能根据任务选择 `search`、`match` 或 `fullmatch`。
 - [ ] 能解释捕获组、非捕获组和命名组。
@@ -1043,7 +1046,7 @@ print(p2.search("\nbc"))
 - [ ] 知道原始字符串 (Raw String)为什么适合编写正则。
 - [ ] 能识别局部匹配、贪婪匹配 (Greedy Matching)和嵌套量词 (Quantifier)的风险。
 
-### 结构化补充（Structured Supplement）：参考资料
+### 参考资料
 
 - [Python 标准库：re](https://docs.python.org/3/library/re.html)
 - [Python HOWTO：Regular Expression](https://docs.python.org/3/howto/regex.html)

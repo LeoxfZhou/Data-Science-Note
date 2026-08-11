@@ -98,8 +98,8 @@ plt.show()  # 图形结果: 天蓝色点画线、金色六边形标记
 |`'d'`|瘦菱形标记|`'|'`|竖线标记|
 |`'_'`|横线标记|||
 
-### 2.4 原稿颜色名与十六进制对照（Source Color-name Reference）
-以下颜色名按原稿完整保留。十六进制颜色不需要在 Python 字符串中转义 `#`。
+### 2.4 颜色名与十六进制对照（Color-name Reference）
+以下是常用颜色名与十六进制表示；十六进制颜色不需要在 Python 字符串中转义 `#`。
 
 |颜色名|十六进制|颜色名|十六进制|颜色名|十六进制|
 |---|---|---|---|---|---|
@@ -467,7 +467,7 @@ plt.show()  # 图形结果: 每个刻度附近显示两组错开的条形及数�
   - `(M, N)`：二维标量数据，通过归一化（Normalization）和颜色映射（Colormap）转换为颜色。
   - `(M, N, 3)`：RGB 数据，浮点值通常在 `[0, 1]`，整数值通常在 `[0, 255]`。
   - `(M, N, 4)`：带透明通道的 RGBA 数据。
-- **`cmap`**：二维标量数据的颜色映射；当前常见默认值是 `'viridis'`。若要显示灰度，可使用 `'gray'` 或原稿中的反向灰度映射 `'Greys'`。
+- **`cmap`**：二维标量数据的颜色映射；当前常见默认值是 `'viridis'`。若要显示灰度，可使用 `'gray'` 或反向灰度映射 `'Greys'`。
 - **`norm` / `vmin` / `vmax`**：控制标量数据如何映射到颜色范围。
 - **`alpha`**：透明度，可为标量或与数据兼容的数组。
 - RGB/RGBA 输入已经包含颜色，`cmap` 会被忽略；超出合法范围的 RGB/RGBA 值会被裁剪。
@@ -578,7 +578,7 @@ upper_left_ax.set_title("抛物线")
 upper_left_ax.plot(x, y2)
 
 lower_right_ax = plt.axes([0.6, 0.2, 0.25, 0.25])
-lower_right_ax.set_title("正弦曲线")  # 原稿误写为“余弦曲线”，实际绘制的是 sin(x)
+lower_right_ax.set_title("正弦曲线")  # y3 = sin(x)，标题与实际数据保持一致
 lower_right_ax.plot(x, y3)
 
 plt.show()  # 图形结果: 一个主坐标系中叠放两个较小坐标系
@@ -611,7 +611,7 @@ plt.close(fig)  # 文件副作用: 在当前目录创建 img.jpg；无固定控�
 ```
 
 ### 12.2 动态更新并保存最后一帧（Animation-like Update and Final Frame）
-原稿在循环中用 `plt.clf()` 清除上一帧、`plt.pause()` 暂停，再在循环结束后保存最终画面。下面保留该行为并使用更清晰的变量名：
+动画循环可用 `plt.clf()` 清除上一帧、`plt.pause()` 暂停，并在循环结束后保存最终画面：
 ```python
 from pathlib import Path
 

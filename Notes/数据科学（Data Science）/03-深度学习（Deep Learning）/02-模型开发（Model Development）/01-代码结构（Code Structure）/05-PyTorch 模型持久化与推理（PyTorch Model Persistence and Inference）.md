@@ -25,6 +25,9 @@ published_at: 2026-08-11
 - `torch.save(model, path)` 依赖 Python pickle 和原始类定义路径。
 - 加载需要 `weights_only=False`，攻击面更大；只对可信文件使用。
 - 官方最佳实践仍是保存 `state_dict`。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> `state_dict` 像只保存模型已经学到的“参数表”，加载时还需要同一套模型结构；checkpoint 则像游戏存档，除了角色属性，还保存训练轮数、优化器动量和其他继续训练所需状态。只保存参数能做推理，但不一定能无缝接着训练。
 ## 2. 保存权重与 checkpoint（Saving Weights and Checkpoints）
 ### 2.1 仅保存模型权重（Model Weights Only）
 ```python

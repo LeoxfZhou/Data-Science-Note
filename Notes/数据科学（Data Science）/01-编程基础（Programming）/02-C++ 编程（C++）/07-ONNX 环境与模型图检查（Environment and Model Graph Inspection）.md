@@ -10,7 +10,7 @@ onnx环境：onnxenv
 查看图形结构：netron exports/mnist_cnn.onnx
 
 ## 命令含义（Command Meaning）
-- `onnxenv`：原稿记录的 ONNX 专用环境名称；未说明它是 Conda 环境（Conda Environment）、虚拟环境（Virtual Environment）还是其他环境管理器中的名称。
+- `onnxenv`：ONNX 专用环境的示例名称；该名称本身不限定使用 Conda、Python 虚拟环境（Virtual Environment）或其他环境管理器。
 - `netron exports/mnist_cnn.onnx`：使用 Netron 打开 `exports/mnist_cnn.onnx`，检查开放神经网络交换格式（Open Neural Network Exchange, ONNX）计算图（Computation Graph）的节点、输入输出、形状（Shape）与算子（Operator）。该命令依赖本机已安装并可从命令行调用 `netron`。
 
 > [!note] 当前记录范围（Current Scope）

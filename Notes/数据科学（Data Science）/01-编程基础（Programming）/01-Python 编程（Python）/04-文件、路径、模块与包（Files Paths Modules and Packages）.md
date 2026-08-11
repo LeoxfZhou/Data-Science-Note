@@ -14,7 +14,7 @@ source:
 # 文件、路径 (Path)、模块 (Module)与包（Files Paths Modules and Packages）
 ## 模块 (Module) & 包 (Modules & Packages)
 ### 一、 模块 (Module)概念 (Module Concept)
-#### 结构化补充（Structured Supplement）：模块 (Module)、包和发行包 (Distribution Package)
+#### 模块 (Module)、包和发行包 (Distribution Package)
 
 - **模块（Module）**：一个可导入的 Python 文件，例如 `metrics.py`。
 - **导入包（Import Package）**：组织模块 (Module)的目录结构。
@@ -24,7 +24,7 @@ source:
 
 - 模块 (Module)是一个包含 Python 定义和语句的文件，把相关的代码分配到一个模块 (Module)里，可以让代码更好用、更易懂。
 ### 二、 模块 (Module)导入 (Module Import)
-#### 结构化补充（Structured Supplement）：导入方式
+#### 导入方式
 
 ```python
 import math
@@ -56,7 +56,7 @@ from module import *
 **注意**：请慎用 `from module import *`，很容易出现名称重复的情况，导致出现一些意外的问题。
 ---
 ### 三、 包的概念 (Package Concept)
-#### 结构化补充（Structured Supplement）：推荐项目结构
+#### 推荐项目结构
 
 ```text
 project/
@@ -105,7 +105,7 @@ print(sys.path)
 ```
 
 ### 六、`__name__` 属性 (`__name__` Attribute)
-#### 结构化补充（Structured Supplement）：`__name__ == "__main__"`
+#### `__name__ == "__main__"`
 
 模块 (Module)被直接运行时，`__name__` 是 `"__main__"`；被其他模块 (Module)导入时，`__name__` 是模块 (Module)名。
 
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 ```
 
 ## 文件和路径 (Path)操作 (File and Path Operations)
-### 结构化补充（Structured Supplement）：使用 `pathlib` 操作路径 (Path)
+### 使用 `pathlib` 操作路径 (Path)
 
 `pathlib.Path` 能跨 Windows、macOS 和 Linux 组合 (Composition)路径 (Path)，通常比手动拼接 (Concatenation)字符串 (String)更安全。
 
@@ -195,7 +195,7 @@ MODULE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = MODULE_DIR / "config.json"
 ```
 
-### 结构化补充（Structured Supplement）：`os`、`shutil` 与 `tempfile`
+### `os`、`shutil` 与 `tempfile`
 
 `pathlib` 主要处理路径 (Path)；`shutil` 处理高级文件操作；`tempfile` 安全创建临时资源。
 
@@ -354,7 +354,7 @@ print(os.path.join(p1, p2, p3))
 
 ---
 ### 二、 文件读写 (File Read & Write)
-#### 结构化补充（Structured Supplement）：文本文件 (Text File)读写
+#### 文本文件 (Text File)读写
 
 ```python
 from pathlib import Path
@@ -392,7 +392,7 @@ with Path("large.log").open("r", encoding="utf-8") as file:
 | `x` | 仅新建 | 文件已存在会报错，可防止误覆盖 |
 | `b` | 二进制模式 | 图片、模型权重等需要使用 |
 
-#### 结构化补充（Structured Supplement）：JSON 与二进制文件 (Binary File)
+#### JSON 与二进制文件 (Binary File)
 
 ```python
 import json
@@ -425,7 +425,7 @@ target.write_bytes(source.read_bytes())
 
 大文件复制应使用 `shutil.copy2()`，避免一次性读入内存。
 
-#### 结构化补充（Structured Supplement）：CSV (Comma-Separated Values) 标准库读写
+#### CSV (Comma-Separated Values) 标准库读写
 
 简单 CSV 可使用标准库 `csv`；数据分析和复杂缺失值 (Missing Value)处理参见 [[08-Pandas 数据处理（Pandas）]]。
 
@@ -448,7 +448,7 @@ with Path("scores.csv").open("w", encoding="utf-8", newline="") as file:
 
 `newline=""` 让 `csv` 模块 (Module)统一处理换行，尤其能避免 Windows 出现额外空行。
 
-#### 结构化补充（Structured Supplement）：安全与边界条件
+#### 安全与边界条件
 
 - 覆盖或删除前，先解析并验证目标路径 (Path)。
 - 不要把未经检查的用户输入直接拼进文件路径 (Path)，防止 `../` 路径 (Path)穿越。
@@ -486,7 +486,7 @@ for i in file:
 
 ---
 ### 三、 `file` 常用对象方法
-#### 结构化补充（Structured Supplement）：文件对象 (File Object) 详细方法
+#### 文件对象 (File Object) 详细方法
 
 | 方法 | 用途 | 重要边界 |
 |---|---|---|
@@ -579,7 +579,7 @@ with open('./exam.txt', mode='w+') as file:
 
 ---
 ### 四、 `with` 语句 (With Statement)
-#### 结构化补充（Structured Supplement）：原子写入 (Atomic Write) 思路
+#### 原子写入 (Atomic Write) 思路
 
 关键配置不应直接覆盖：如果写入中途崩溃，目标可能只剩半个文件。更安全的流程是同目录写临时文件，刷新成功后再替换。
 
@@ -636,7 +636,7 @@ with open(r'./t01.txt', mode='w') as file:
 > **外部副作用（External Side Effect）**：该示例会读取、创建或修改外部资源，其结果取决于文件系统或运行环境，因此不规定固定控制台输出（Console Output）。
 
 ## 进阶补充与核对（Advanced Supplements and Verification）
-### 结构化补充（Structured Supplement）：完成检查
+### 完成检查
 
 - [ ] 能解释模块 (Module)、导入包和发行包 (Distribution Package)的区别。
 - [ ] 能解释 `__name__ == "__main__"` 的用途。
@@ -644,7 +644,7 @@ with open(r'./t01.txt', mode='w') as file:
 - [ ] 能正确选择文本/二进制模式和文件打开模式。
 - [ ] 知道相对路径 (Path)为什么会随工作目录变化。
 
-### 结构化补充（Structured Supplement）：参考资料
+### 参考资料
 
 - [Python 官方教程：Modules](https://docs.python.org/3/tutorial/modules.html)
 - [Python 标准库：pathlib](https://docs.python.org/3/library/pathlib.html)

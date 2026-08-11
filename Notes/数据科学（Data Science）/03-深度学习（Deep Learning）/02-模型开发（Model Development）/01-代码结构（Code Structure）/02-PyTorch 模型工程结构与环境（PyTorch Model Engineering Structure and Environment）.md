@@ -25,6 +25,9 @@ published_at: 2026-08-11
 3. 进入评估模式并关闭梯度记录，执行前向预测。
 4. 对 logits、坐标、掩码或序列输出做任务相关后处理。
 5. 把结果交付给 API、批处理任务、硬件代理或下游业务。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 一个模型项目不只是网络结构，而是一条完整生产线：数据怎样进入、参数怎样学习、结果怎样验证、权重怎样保存、线上输入怎样按同样规则处理。任何一环与训练时不一致，都可能让“代码能运行”但预测结果失真。
 ## 2. 设备选择（Device Selection）
 ### 2.1 CUDA、MPS 与 CPU
 ```python
@@ -66,7 +69,7 @@ print(device.type)  # 输出: 'cuda'、'mps' 或 'cpu'，取决于环境
 |`nn.Flatten`|`start_dim`、`end_dim`|把指定连续维度展平|
 
 ### 3.3 三层分类网络（Three-layer Classification Network）
-- 原稿将两个卷积模块加一个全连接层称为“三层 CNN”。输入必须是 `[N,3,224,224]`，两次 `2×2` 池化后空间尺寸为 `56×56`。
+- 该“三层 CNN”由两个卷积模块和一个全连接层组成。输入必须是 `[N,3,224,224]`，两次 `2×2` 池化后空间尺寸为 `56×56`。
 - 如果输入尺寸变化，固定的 `32*56*56` 会导致 `Linear` 形状错误；可在变换层固定尺寸，或使用自适应池化降低耦合。
 ```python
 import torch
@@ -84,7 +87,7 @@ class SimpleThreeLayerCNN(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
-        # 固定到 56×56，既保留原稿结构，又让错误输入更容易定位。
+        # 固定到 56×56，使全连接层输入维度明确，并让错误输入更容易定位。
         self.pool = nn.AdaptiveAvgPool2d((56, 56))
         self.classifier = nn.Linear(32 * 56 * 56, num_classes)
 

@@ -14,14 +14,14 @@ source:
 # 错误 (Error)与异常（Errors and Exceptions）
 ## 错误 (Error)与异常 (Errors and Exceptions)
 ### 一、 错误 (Error)分类 (Error Classification)
-#### 结构化补充（Structured Supplement）：错误 (Error)类型
+#### 错误 (Error)类型
 
 - **语法错误（SyntaxError）**：代码无法被正确解析，程序尚未开始正常执行。
 - **异常（Exception）**：语法合法，但运行时发生了无法继续完成的情况。
 
 阅读 traceback 时从最后一行开始：先看异常 (Exception)类型和消息，再沿调用栈 (Call Stack)向上寻找自己代码中的第一处相关位置。
 
-#### 结构化补充（Structured Supplement）：异常层级 (Exception Hierarchy)
+#### 异常层级 (Exception Hierarchy)
 
 大多数应用异常 (Exception)继承 (Inheritance)自 `Exception`。`BaseException` 还包含 `KeyboardInterrupt`、`SystemExit` 等控制程序退出的异常 (Exception)，因此普通业务代码通常不应捕获 `BaseException`。
 
@@ -52,7 +52,7 @@ except OSError:
     handle_other_io_error()
 ```
 
-#### 结构化补充（Structured Supplement）：`assert`、警告 (Warnings) 与异常 (Exception)的区别
+#### `assert`、警告 (Warnings) 与异常 (Exception)的区别
 
 - `raise`：验证外部输入或表达运行时失败，生产环境必须保留。
 - `assert`：检查开发者认为必然成立的内部不变量 (Invariant)。Python 优化模式可能移除断言，因此不能用它验证用户输入。
@@ -72,7 +72,7 @@ def normalize(values: list[float]) -> list[float]:
     return result
 ```
 
-#### 结构化补充（Structured Supplement）：常见异常 (Exception)
+#### 常见异常 (Exception)
 
 | 异常 (Exception) | 常见原因 |
 |---|---|
@@ -90,7 +90,7 @@ def normalize(values: list[float]) -> list[float]:
 - **异常 (Exception)错误 (Exception Error)**：在运行时 (Runtime) 检测到的错误 (Error)，此时程序的语法是正确的。
 ---
 ### 二、 处理异常 (Handling Exceptions)
-#### 结构化补充（Structured Supplement）：捕获具体异常 (Exception)
+#### 捕获具体异常 (Exception)
 
 ```python
 def parse_ratio(numerator: str, denominator: str) -> float:
@@ -110,7 +110,7 @@ def parse_ratio(numerator: str, denominator: str) -> float:
 > [!warning]
 > 避免裸写 `except:`，它连 `KeyboardInterrupt` 等退出信号也会捕获。通常应捕获明确的异常 (Exception)类型；确实需要兜底时使用 `except Exception`，并记录或重新抛出异常 (Exception)。
 
-#### 结构化补充（Structured Supplement）：什么时候处理，什么时候继续抛出
+#### 什么时候处理，什么时候继续抛出
 
 只在当前层能够做出有效处理时捕获异常 (Exception)，例如：
 
@@ -171,7 +171,7 @@ div('2', 2)
 # 输出说明: 按 `print()` 的出现顺序输出上方已构造对象的当前值；若输出包含内存地址 (Memory Address)、随机数 (Random Number)、平台路径 (Path)或版本 (Version)信息，具体字符可能随运行环境变化。
 ```
 #### 2. 处理多个异常 (Exception)
-##### 结构化补充（Structured Supplement）：多个异常 (Multiple Exceptions)
+##### 多个异常 (Multiple Exceptions)
 
 多个无关任务需要并行报告错误 (Error)时，现代 Python 提供异常组 (Exception Group) 和 `except*`。普通顺序代码仍优先使用常规 `try/except`。
 
@@ -221,7 +221,7 @@ div('2', 2)
 ```
 ---
 ### 三、 完整异常处理 (Exception Handling)结构 (Complete Structure)
-#### 结构化补充（Structured Supplement）：`else` 与 `finally`
+#### `else` 与 `finally`
 
 ```python
 from pathlib import Path
@@ -297,7 +297,7 @@ div(2, 0)
 ```
 ---
 ### 四、 抛出异常 (Raising Exceptions)
-#### 结构化补充（Structured Supplement）：主动抛出异常 (Exception)
+#### 主动抛出异常 (Exception)
 
 ```python
 def set_probability(value: float) -> float:
@@ -345,7 +345,7 @@ div(2, 1)
 ```
 
 ## 进阶补充与核对（Advanced Supplements and Verification）
-### 结构化补充（Structured Supplement）：完成检查
+### 完成检查
 
 - [ ] 能从 traceback 中找到异常 (Exception)类型、消息和自己代码的位置。
 - [ ] 能解释为什么优先捕获具体异常 (Exception)。
@@ -353,6 +353,6 @@ div(2, 1)
 - [ ] 能使用 `raise ... from ...` 保留异常 (Exception)链。
 - [ ] 不会用异常处理 (Exception Handling)掩盖程序错误 (Error)。
 
-### 结构化补充（Structured Supplement）：参考资料
+### 参考资料
 
 - [Python 官方教程：Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html)

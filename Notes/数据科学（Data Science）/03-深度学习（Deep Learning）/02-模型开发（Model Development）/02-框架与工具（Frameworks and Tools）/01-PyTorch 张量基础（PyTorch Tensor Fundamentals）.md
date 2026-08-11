@@ -27,14 +27,16 @@ created: 2026-08-11
 - **跨平台与分布式能力（Cross-platform and Distributed Support）**：支持 Linux、Windows、macOS，以及多 GPU 和分布式训练；具体设备支持取决于 PyTorch 构建版本与硬件后端，不能笼统认为所有安装都支持 CUDA 或 TPU。
 ### 1.3 简要发展脉络（Brief History）
 - **Torch / Torch7**：早期 Torch 由 Ronan Collobert、Clément Farabet 等人推动，是提供多维张量与科学计算工具的框架；Torch7 使用 Lua，在深度学习中得到应用，之后逐渐停止维护。
-- **PyTorch 0.1.0**：原稿把 2016 年 FAIR 发布的首个 PyTorch 版本记为 0.1.0。它承接 Torch7 的张量与神经网络经验，同时采用更符合 Python 习惯的接口，使模型定义和调试更直观。
-- **PyTorch 0.2.0 的来源说法**：原稿称 0.2.0 “首次引入动态图”。该表述的精确版本时间线没有在本轮官方 API 文档中得到支持；动态图/运行时定义（Define-by-run）是早期 PyTorch 的核心设计，正式笔记不把“0.2.0 首次引入”当作已确认事实，但保留这项来源差异供审核。
+- **PyTorch 早期版本**：PyTorch 承接 Torch7 的张量与神经网络经验，同时采用更符合 Python 习惯的接口，使模型定义和调试更直观。动态图/运行时定义（Define-by-run）是早期 PyTorch 的核心设计；精确版本时间线应以对应版本的官方发布记录为准。
 - **PyTorch 1.0**：2018 年的稳定版本整合研究原型与生产部署路径，并延续即时执行（Eager Execution）体验。
 - **PyTorch 2.x**：引入 `torch.compile` 编译加速路径，并持续改进编译器、分布式和硬件后端。版本能力应以当前官方文档为准，不应把 TorchDynamo 简化为对所有 `torch.jit.trace`、`torch.jit.script` 使用场景的直接替代。
 ![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/02-模型开发（Model Development）/02-框架与工具（Frameworks and Tools）/01-PyTorch 张量基础（PyTorch Tensor Fundamentals）/01-PyTorch 张量基础（PyTorch Tensor Fundamentals）-20260328152712627.png|PyTorch 发展与编译栈]]
 ### 1.4 安装与环境确认（Installation and Environment Check）
 - CPU、CUDA 和其他后端需要不同安装组合，优先使用 PyTorch 官网安装选择器生成命令。
-- 原稿使用清华镜像安装通用 `torch` 包，命令可用于兼容的平台，但不会自动保证获得所需 CUDA 构建：
+- 清华 PyPI 镜像可用于兼容平台安装通用 `torch` 包，但不会自动保证获得所需 CUDA 构建：
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 张量可以看成“带形状、数据类型和设备信息的多维数组”。PyTorch 不只保存数值，还会在需要时记录运算关系，因此同一个张量既能参加普通数值计算，也能成为自动微分计算图中的节点。
 ```bash
 python -m pip install torch -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```

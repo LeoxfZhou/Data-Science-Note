@@ -178,7 +178,7 @@ int main() {
 - **全局变量的使用注意事项：** 虽然全局变量方便访问，但过度使用全局变量会降低代码的模块化程度，增加命名冲突的风险，并可能导致程序难以维护和调试。 应该谨慎使用全局变量，尽可能使用局部变量或将数据封装在类中。
 ---
 
-> [!warning] 内存管理纠错（Memory Management Corrections）
+> [!warning] 内存管理边界（Memory-management Boundaries）
 > “堆溢出”不等同于“堆缓冲区溢出（Heap Buffer Overflow）”：前者常指动态存储耗尽，后者是越界写导致的内存破坏。普通 `new` 分配失败默认抛出 `std::bad_alloc`，只有 `new (std::nothrow)` 才以 `nullptr` 表示失败。原示例中的局部静态裸指针 `static int* ptr = new int(100);` 没有对应 `delete`，会一直保留到进程结束；教学演示可说明生命周期，但工程代码应使用值对象或 `std::unique_ptr`。局部静态变量具有静态存储期，但初始化发生在程序第一次执行到声明处时；自 C++11 起该初始化具有线程安全保证。
 
 ## 工程推荐：优先使用 RAII（Prefer RAII in Production）

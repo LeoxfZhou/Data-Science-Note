@@ -57,7 +57,10 @@ $$
 ### 5.2 适用激活（Applicable Activations）
 - 适合线性、Tanh 和一些近似对称激活；应通过 `nn.init.calculate_gain()` 选择增益。
 - 深层 ReLU 会把负半轴置零，Xavier 的理想方差假设不再匹配，常改用 Kaiming。
-- 来源用 $\operatorname{Var}(\operatorname{ReLU}(x))\approx\frac12\operatorname{Var}(x)$ 推导 $0.5^L$ 衰减。这是对零均值对称输入的简化直觉，真实网络受均值偏移、权重、归一化和残差影响。
+- 在零均值对称输入的简化假设下，$\operatorname{Var}(\operatorname{ReLU}(x))\approx\frac12\operatorname{Var}(x)$，连续 $L$ 层可能产生近似 $0.5^L$ 的方差衰减；真实网络还受均值偏移、权重、归一化和残差连接影响。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 初始化是在训练开始前决定每条连接的“起跑位置”。全是相同值会让多个神经元学成同一个样子；数值太大会让信号和梯度爆掉，太小又会让它们逐层消失。Xavier 和 Kaiming 的核心目标，就是让信号经过多层后仍保持在可学习的量级。
 ## 6. Kaiming（He）初始化
 ### 6.1 ReLU 正态形式（Normal Form for ReLU）
 $$
@@ -152,4 +155,4 @@ print(network.output.bias.sum().item())  # 输出: 0.0
 - [`torch.nn.init` 官方文档](https://docs.pytorch.org/docs/stable/nn.init.html)
 - [Understanding the Difficulty of Training Deep Feedforward Neural Networks](https://proceedings.mlr.press/v9/glorot10a.html)
 - [Delving Deep into Rectifiers](https://arxiv.org/abs/1502.01852)
-- [来源补充视频：Kaiming vs. Xavier](https://www.youtube.com/watch?v=r_GYQvnfP3M)
+- [Kaiming 与 Xavier 初始化对比视频](https://www.youtube.com/watch?v=r_GYQvnfP3M)

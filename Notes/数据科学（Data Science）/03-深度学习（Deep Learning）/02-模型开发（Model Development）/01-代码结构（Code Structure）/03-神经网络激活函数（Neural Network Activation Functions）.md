@@ -15,6 +15,9 @@ published_at: 2026-08-11
 - 多个没有非线性激活的仿射层复合后仍是一个仿射变换，深度无法增加函数类别的表达能力。
 - 激活函数（Activation Function）逐元素引入非线性，使网络能够逼近复杂决策边界。
 - 标准逐元素激活通常保持张量形状不变，并对每个位置独立计算；这条性质不自动适用于 GLU、Maxout 等会切分或聚合通道的特殊激活结构。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 激活函数给线性变换加入“拐弯能力”。如果没有激活函数，不管堆多少层，整体仍等价于一次线性变换；如果激活函数长期处在几乎不变化的饱和区，梯度就像被关小的水龙头，越往前传越弱。
 ## 2. 选择维度（Selection Criteria）
 
 |维度（Criterion）|需要关注的问题|
@@ -127,7 +130,7 @@ print(torch.equal(module_result, functional_result))  # 输出: True
 ## 9. MobileNet 中的激活设计（Activation Design in MobileNet）
 ### 9.1 MobileNet V1
 - 深度可分离卷积（Depthwise Separable Convolution）通常由深度卷积（Depthwise Convolution）和逐点卷积（Pointwise Convolution）组成。
-- 来源结构为 `Depthwise Conv → BatchNorm → ReLU → Pointwise Conv → BatchNorm → ReLU`。
+- MobileNet V1 的典型模块结构为 `Depthwise Conv → BatchNorm → ReLU → Pointwise Conv → BatchNorm → ReLU`。
 ### 9.2 MobileNet V2 线性瓶颈（Linear Bottleneck）
 - MobileNet V2 的倒残差（Inverted Residual）在低维瓶颈输出处采用线性映射，而不是再用 ReLU 截断。
 - 低维特征空间容量有限，ReLU 把负值置零可能不可逆地破坏信息；线性瓶颈用于尽量保存投影后的特征。

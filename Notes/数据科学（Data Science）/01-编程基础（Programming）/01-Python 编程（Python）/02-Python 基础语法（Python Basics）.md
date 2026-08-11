@@ -110,6 +110,9 @@ print(left is right)  # True
 - `==` 比较值是否相等；`is` 比较是否是同一个对象。
 - 判断空值使用 `value is None`，不要使用 `value == None`。
 
+> [!tip] 大白话理解（Plain-language Intuition）
+> Python 变量更像贴在对象上的标签，而不是直接装值的盒子。两个变量可以同时指向同一个可变对象，所以通过其中一个变量修改对象，另一个变量也会看到变化；重新赋值只是把标签改贴到别处，不会自动修改旧对象。
+
 需要独立列表 (List)时显式复制：
 
 ```python
@@ -1654,7 +1657,7 @@ print(id(shared) == id(independent))  # False
 ```
 
 > [!warning] 整数缓存与常量折叠（Integer Caching and Constant Folding）
-> 原稿使用 `256` 和 `257` 比较 `is`，意图展示 CPython 的小整数缓存 (Small-integer Cache)。但对象复用还会受到解释器实现、交互式环境和编译器常量折叠 (Constant Folding) 影响，不能把某个固定整数边界当作 Python 语言保证。比较数值使用 `==`；只有判断 `None` 等单例 (Singleton) 时才应依赖 `is`。
+> CPython 的小整数缓存 (Small-integer Cache)会复用部分整数对象，但对象复用还会受到解释器实现、交互式环境和编译器常量折叠 (Constant Folding)影响，不能把某个固定整数边界当作 Python 语言保证。比较数值使用 `==`；只有判断 `None` 等单例 (Singleton)时才应依赖 `is`。
 
 ### 3.11 运算符优先级（Operator Precedence）
 以下表格列出了从高到低优先级的常用运算符 (Operator)：
@@ -1818,10 +1821,6 @@ print('不及格!')
 
 ---
 ### 4.3 循环语句（Loop Statements）
-
-> [!note] 原稿图示占位（Diagram Placeholder）
-> 原稿包含“Python `while` 循环流程图”占位文字，但没有对应附件。该信息暂时保留，补充正式图片后再替换为 `![[Attachment]]`。
-
 #### 1. `while` 循环（`while` Loop）
 
 ```Python

@@ -13,7 +13,7 @@ source:
 
 # NumPy 数值计算（NumPy）
 ### 一、 NumPy 简介 (Introduction)
-#### 结构化补充（Structured Supplement）：常见错误 (Error)
+#### 常见错误 (Error)
 
 - 混淆 `*` 与 `@`。
 - 不知道切片 (Slicing)共享原数组 (Array)数据。
@@ -28,7 +28,7 @@ NumPy (Numerical Python) 是 Python 进行科学计算 (Scientific Computing) �
 - 数组 (Array)创建后具有固定大小，而列表 (List)由于内存自动管理，可动态调整。
 ---
 ### 二、 创建数组 (Array)与属性 (Creating Arrays and Attributes)
-#### 结构化补充（Structured Supplement）：创建数组 (Array)
+#### 创建数组 (Array)
 
 ```python
 import numpy as np
@@ -86,7 +86,7 @@ print(arr)
 ```
 
 #### 2. DTYPE 常用值 (Common Data Types)
-##### 结构化补充（Structured Supplement）：数据类型 (Data Types) 与类型转换 (Type Casting)
+##### 数据类型 (Data Types) 与类型转换 (Type Casting)
 
 常见数据类型 (Data Types)：
 
@@ -145,7 +145,7 @@ print(safe_pixels + 20)
 |`np.float64`|双精度浮点数 (8个字节)|
 
 #### 3. NDARRAY 常用属性 (NDARRAY Attributes)
-##### 结构化补充（Structured Supplement）：`ndarray` 的核心属性
+##### `ndarray` 的核心属性
 
 NumPy 的核心是同质多维数组 (Array) `ndarray`。同一数组 (Array)中的元素通常共享一个 `dtype`，因此它能进行高效的向量化 (Vectorization)运算。
 
@@ -163,7 +163,7 @@ print(array.itemsize)  # 4（float32 的每个元素占 4 字节）
 
 在深度学习代码中，先检查 `shape`、`dtype` 和设备，往往比直接修改模型更快定位问题。
 
-##### 结构化补充（Structured Supplement）：内存布局 (Memory Layout) 与性能
+##### 内存布局 (Memory Layout) 与性能
 
 NumPy 数组 (Array)通常以连续内存 (Contiguous Memory)存储。转置 (Transpose)和切片 (Slicing)可能创建非连续视图 (Non-contiguous View)，某些底层库需要连续数组 (Array)。
 
@@ -250,7 +250,7 @@ print(np.linspace(1, 10, num=10, dtype=np.int32))
 
 ---
 ### 四、 基本运算与广播机制 (Basic Operations and Broadcasting)
-#### 结构化补充（Structured Supplement）：向量化 (Vectorization)运算
+#### 向量化 (Vectorization)运算
 
 ```python
 import numpy as np
@@ -264,9 +264,12 @@ mask = values > 1.5
 
 优先数组 (Array)运算，不要把 NumPy 当作普通列表 (List)逐元素循环；向量化 (Vectorization)通常更简洁，也能利用底层优化。
 
-#### 结构化补充（Structured Supplement）：广播（Broadcasting）
+#### 广播（Broadcasting）
 
 NumPy 从最后一个维度 (Dimension)开始比较形状；两个维度 (Dimension)相等，或其中一个为 `1` 时可以广播 (Broadcasting)。缺失的前导维度 (Dimension)视为 `1`。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 广播可以理解为“先从最右边对齐形状，再把长度为 1 的轴想象成重复展开”。NumPy 通常不会真的复制出整块重复数据，但如果两边某个轴既不相等、也没有一边是 1，就不知道应该怎样配对，因此会报形状不兼容。
 
 ```python
 import numpy as np
@@ -343,7 +346,7 @@ print((a + i).shape)  # (5, 2, 3, 4)
 
 ---
 ### 五、 索引 (Index)和切片 (Indexing and Slicing)
-#### 结构化补充（Structured Supplement）：索引 (Index)、切片 (Slicing)、视图 (View)与副本 (Copy)
+#### 索引 (Index)、切片 (Slicing)、视图 (View)与副本 (Copy)
 
 ```python
 import numpy as np
@@ -365,6 +368,9 @@ print(array[array % 2 == 0])  # 布尔索引。
 
 > [!warning] 切片 (Slicing)通常是视图 (View)
 > 修改切片 (Slicing)可能同时修改原数组 (Array)。需要独立数据时显式调用 `.copy()`。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 视图像透过同一扇窗看原数组：换一个变量名并没有复制数据，所以从视图修改内容，原数组也会变化；副本则像复印件，后续修改互不影响。共享内存能节省空间，但也容易产生意外联动。
 
 ```python
 view = array[:, :2]
@@ -428,7 +434,7 @@ print(arr[1, ::2, 0])      # [4 9]
 ```
 
 #### 3. 数组 (Array)的高阶索引 (Advanced Indexing)
-##### 结构化补充（Structured Supplement）：高级索引 (Advanced Indexing)
+##### 高级索引 (Advanced Indexing)
 ###### 整数 (Integer)数组 (Array)索引 (Integer Array Indexing)
 
 ```python
@@ -534,7 +540,7 @@ print(x[np.array(bool_list)])  # [[[ 0  1  2  3]
 
 ---
 ### 六、 常用操作 (Common Operations)
-#### 结构化补充（Structured Supplement）：形状变换与拼接 (Concatenation)
+#### 形状变换与拼接 (Concatenation)
 
 ```python
 import numpy as np
@@ -555,7 +561,7 @@ concatenated = np.concatenate([left, right], axis=0)  # 连接已有轴，shape=
 stacked = np.stack([left, right], axis=0)              # 新增一个轴，shape=(2, 2, 3)。
 ```
 
-#### 结构化补充（Structured Supplement）：保存与加载
+#### 保存与加载
 
 ```python
 import numpy as np
@@ -658,7 +664,7 @@ print(np.stack((a1, a2, a3, a4), axis=2).shape)  # (2, 3, 4)
 ```
 
 #### 4. 矩阵乘法 (Matrix Multiplication)
-##### 结构化补充（Structured Supplement）：矩阵乘法 (Matrix Multiplication)
+##### 矩阵乘法 (Matrix Multiplication)
 
 ```python
 import numpy as np
@@ -673,7 +679,7 @@ predictions = features @ weights
 - `@` / `np.matmul()` 是矩阵乘法 (Matrix Multiplication)。
 - 高维批量矩阵乘法 (Matrix Multiplication)时，`matmul` 会把最后两个轴 (Axis)当作矩阵轴 (Axis)，并广播 (Broadcasting)前面的批次轴 (Axis)。
 
-##### 结构化补充（Structured Supplement）：线性代数 (Linear Algebra)
+##### 线性代数 (Linear Algebra)
 
 ```python
 import numpy as np
@@ -773,7 +779,7 @@ print(a != b)                            # [[ True False]
 
 ---
 ### 八、 数学函数 (Mathematical Functions)
-#### 结构化补充（Structured Supplement）：缺失值 (Missing Value)、无穷值 (Infinite Value)与数值稳定性 (Numerical Stability)
+#### 缺失值 (Missing Value)、无穷值 (Infinite Value)与数值稳定性 (Numerical Stability)
 
 ```python
 import numpy as np
@@ -798,7 +804,7 @@ safe_probabilities = np.clip(probabilities, 1e-7, 1 - 1e-7)
 log_values = np.log(safe_probabilities)
 ```
 
-#### 结构化补充（Structured Supplement）：通用函数 (Universal Functions, Ufuncs)
+#### 通用函数 (Universal Functions, Ufuncs)
 
 通用函数 (Universal Functions, Ufuncs) 对数组 (Array)逐元素运算 (Element-wise Operation)，并支持广播 (Broadcasting)、输出数组 (Array)和条件掩码。
 
@@ -888,7 +894,7 @@ print(np.log10([1e-15, 1000]))  # [-15.   3.]
 
 ---
 ### 九、 统计与聚合函数 (Statistics and Aggregation)
-#### 结构化补充（Structured Supplement）：`axis` 与聚合 (Aggregation)
+#### `axis` 与聚合 (Aggregation)
 
 ```python
 import numpy as np
@@ -903,7 +909,7 @@ matrix.mean(axis=1, keepdims=True)  # shape=(2, 1)，便于继续广播。
 
 理解 `axis` 的可靠方法是：指定哪个轴 (Axis)，哪个轴 (Axis)就在聚合 (Aggregation)结果中被压缩。
 
-#### 结构化补充（Structured Supplement）：统计与分位数 (Quantiles)
+#### 统计与分位数 (Quantiles)
 
 ```python
 import numpy as np
@@ -983,7 +989,7 @@ print(np.sum([[1, 2], [3, 4]], axis=0, keepdims=True))   # [[4 6]]  → 保持�
 
 ---
 ### 十、 查找与极值 (Searching and Extremes)
-#### 结构化补充（Structured Supplement）：排序 (Sorting)、查找与集合 (Set)操作
+#### 排序 (Sorting)、查找与集合 (Set)操作
 
 ```python
 import numpy as np
@@ -1087,7 +1093,7 @@ print(np.argmin(a, axis=1))                      # [0 0]
 
 ---
 ### 十一、 随机模块 (Random Module)
-#### 结构化补充（Structured Supplement）：随机数 (Random Number)与可复现性 (Reproducibility)
+#### 随机数 (Random Number)与可复现性 (Reproducibility)
 
 ```python
 import numpy as np
@@ -1162,7 +1168,7 @@ print(np.random.uniform(1, 2, size=4))
 ```
 
 ## 进阶补充与核对（Advanced Supplements and Verification）
-### 结构化补充（Structured Supplement）：完成检查
+### 完成检查
 
 - [ ] 能根据 `shape` 判断每个轴 (Axis)的含义。
 - [ ] 能解释广播 (Broadcasting)规则和 `axis` 聚合 (Aggregation)。
@@ -1170,7 +1176,7 @@ print(np.random.uniform(1, 2, size=4))
 - [ ] 能使用布尔索引 (Boolean Indexing)和向量化 (Vectorization)完成数据筛选与变换。
 - [ ] 能使用 `default_rng()` 生成可复现随机数 (Random Number)据。
 
-### 结构化补充（Structured Supplement）：参考资料
+### 参考资料
 
 - [NumPy User Guide](https://numpy.org/doc/stable/user/)
 - [NumPy Quickstart](https://numpy.org/doc/stable/user/quickstart.html)

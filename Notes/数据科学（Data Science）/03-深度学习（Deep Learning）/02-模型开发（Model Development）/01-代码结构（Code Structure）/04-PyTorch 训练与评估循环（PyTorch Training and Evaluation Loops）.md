@@ -23,6 +23,9 @@ published_at: 2026-08-11
 - `torch.no_grad()` 关闭反向模式梯度记录，适合验证和普通推理。
 - `torch.inference_mode()` 关闭更多 autograd 簿记，纯推理可能更高效，但限制更强。
 - 验证通常只需要指标，不调用 `backward()`。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> `train()`/`eval()` 决定模型里的某些层按训练规则还是推理规则工作；`no_grad()`/`inference_mode()` 决定是否记录求导信息。这是两个互相独立的开关，所以评估时通常既要 `eval()`，也要关闭梯度记录。
 ## 2. 单次参数更新（Single Optimization Step）
 1. `optimizer.zero_grad()`：清除或置空历史梯度。
 2. `outputs = model(inputs)`：前向传播（Forward Pass）。
@@ -170,8 +173,8 @@ def fit(
 - 训练过程中可以按验证损失或任务指标保存最佳 checkpoint；不要只保存最后一个 epoch。
 - 学习率调度器应按其 API 要求在 batch 或 epoch 边界调用；不同调度器的 `step()` 时机不同。
 ## 6. 图像分类最小闭环（Minimal Image-classification Loop）
-- 来源使用 `ImageFolder` 从 `17flowers/train/<class>/...` 目录读取类别，并以 batch size 4/8、3 个 epoch 演示。
-- 来源每两个 batch 打印一次 `epoch/batch/current loss`，并在 epoch 末打印平均损失。实际项目应把频率设为配置，避免小数据集日志过少或大数据集 I/O 过多；进度日志不能替代结构化实验记录。
+- 示例使用 `ImageFolder` 从 `17flowers/train/<class>/...` 目录读取类别，并以 batch size 4/8、3 个 epoch 演示。
+- 示例每两个 batch 打印一次 `epoch/batch/current loss`，并在 epoch 末打印平均损失。实际项目应把频率设为配置，避免小数据集日志过少或大数据集 I/O 过多；进度日志不能替代结构化实验记录。
 - 完整程序需要先定义数据变换、DataLoader、模型、交叉熵和 SGD；路径应来自配置而不是硬编码 `D:\datas\17flowers\train`。
 - 路径不存在应立即报告；空数据集、类别不足和损坏图片也需要显式错误处理。
 ```python

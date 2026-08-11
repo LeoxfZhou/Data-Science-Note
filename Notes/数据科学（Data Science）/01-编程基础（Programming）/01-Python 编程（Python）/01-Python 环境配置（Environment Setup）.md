@@ -14,7 +14,7 @@ source:
 
 # Python 环境配置（Environment Setup）
 ## Python 入门与环境搭建 (Mac版)
-### 结构化补充（Structured Supplement）：常见问题排查
+### 常见问题排查
 #### 安装成功但无法导入
 
 ```ipython
@@ -43,7 +43,7 @@ python -m pip show package-name
 
 ---
 ### 一、 初识编程语言 (Programming Language)
-#### 结构化补充（Structured Supplement）：需要区分的三个概念
+#### 需要区分的三个概念
 
 - **解释器（Interpreter）**：真正执行 Python 程序的程序，例如 CPython。
 - **虚拟环境（Virtual Environment）**：为一个项目隔离解释器 (Interpreter)和第三方依赖。
@@ -82,7 +82,7 @@ import this
 ---
 ### 三、 环境搭建 (Environment Setup)
 #### 1. Python 安装
-##### 结构化补充（Structured Supplement）：推荐选择
+##### 推荐选择
 
 | 场景 | 推荐方案 | 原因 |
 |---|---|---|
@@ -94,7 +94,7 @@ import this
 > [!tip]
 > 初学阶段优先掌握 `venv`。只有项目确实需要 Conda 时再切换，避免同时学习多套环境工具。
 
-##### 结构化补充（Structured Supplement）：Python 解释器 (Python Interpreter) 的查找顺序
+##### Python 解释器 (Python Interpreter) 的查找顺序
 
 激活虚拟环境 (Virtual Environment) 的本质之一，是把该环境的可执行目录放到 `PATH` 环境变量 (Environment Variable) 前面。
 
@@ -138,7 +138,7 @@ print(inside_virtual_environment)
     - **下载**: [Anaconda 官网](https://www.anaconda.com/download) 或 [清华镜像 (推荐)](https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/?C=M&O=D)。
 
 #### 2. IDE 安装 (集成开发环境 (Integrated Development Environment, IDE))
-##### 结构化补充（Structured Supplement）：IDE 与 Notebook
+##### IDE 与 Notebook
 ###### VS Code / PyCharm
 
 核心操作只有两个：
@@ -171,7 +171,7 @@ python -m ipykernel install --user \
 
 在 Notebook 中安装包时，优先使用 `%pip install package`，因为它会使用当前内核 (Kernel)对应的环境。
 
-##### 结构化补充（Structured Supplement）：Notebook 内核 (Notebook Kernel) 常见陷阱
+##### Notebook 内核 (Notebook Kernel) 常见陷阱
 
 Notebook 页面显示的环境名称不一定等于启动 Jupyter 的终端环境。真正执行代码的是当前选中的内核 (Kernel)。
 
@@ -222,7 +222,7 @@ IDE 集成了编码 (Encoding)、分析、编译、调试等功能。
 - **运行**: Mac 上通常直接使用 **Ctrl + R** 或 **Ctrl + Shift + R** (取决于设置)，也可以在上下文菜单中选择 Run。
 - **中断**: **Ctrl + C** (在 Terminal 中死循环时使用)。
 #### 4. 代码调试示例 (Debug)
-##### 结构化补充（Structured Supplement）：调试器 (Debugger) 基础
+##### 调试器 (Debugger) 基础
 
 断点 (Breakpoint)调试 (Breakpoint Debugging) 应重点观察：
 
@@ -364,7 +364,7 @@ a = 10  # 注释也可以写在代码的后面
 
 ## Conda 虚拟环境 (Virtual Environment)管理 (Virtual Environment Management)
 ### 一、 为什么需要虚拟环境 (Virtual Environment)？
-#### 结构化补充（Structured Supplement）：使用 `venv` 创建项目环境
+#### 使用 `venv` 创建项目环境
 ##### macOS / Linux
 
 ```bash
@@ -446,7 +446,7 @@ conda config --remove-key channels
 ```
 ---
 ### 四、 虚拟环境 (Virtual Environment)的生命周期管理
-#### 结构化补充（Structured Supplement）：Conda 的最小用法
+#### Conda 的最小用法
 
 ```bash
 # 不要长期把所有项目都装进 base；每个项目创建独立环境。
@@ -488,7 +488,7 @@ conda remove -n PY01 --all
 ```
 ---
 ### 五、 包管理 (Package Management)
-#### 结构化补充（Structured Supplement）：安装和记录依赖
+#### 安装和记录依赖
 
 ```bash
 # 使用 python -m pip 可以确保 pip 属于当前这个 Python 解释器。
@@ -507,7 +507,7 @@ python -m pip install -r requirements.txt
 
 `requirements.txt` 适合简单项目；需要构建、发布或精细区分依赖时，再学习 `pyproject.toml`。
 
-#### 结构化补充（Structured Supplement）：依赖清单 (Dependency Manifest) 的层次
+#### 依赖清单 (Dependency Manifest) 的层次
 
 | 文件 | 适用场景 | 说明 |
 |---|---|---|
@@ -530,7 +530,7 @@ conda env create --file environment.yml
 
 `pip freeze` 同样记录当前环境中的所有包，不区分直接依赖 (Direct Dependency) 和传递依赖 (Transitive Dependency)。
 
-#### 结构化补充（Structured Supplement）：包安装 (Package Installation) 的排错顺序
+#### 包安装 (Package Installation) 的排错顺序
 
 1. 确认解释器 (Interpreter)：`python -c "import sys; print(sys.executable)"`。
 2. 确认 pip (Package Installer)：`python -m pip --version`。
@@ -585,7 +585,7 @@ conda remove -n PY01 numpy
 1. **切换环境**：在 PyCharm 右下角点击当前解释器 (Interpreter)名称，可以快速在 Base 和其他虚拟环境 (Virtual Environment)间切换。
 
 ## 进阶补充与核对（Advanced Supplements and Verification）
-### 结构化补充（Structured Supplement）：完成检查
+### 完成检查
 
 - [ ] 能创建、激活、退出和删除虚拟环境 (Virtual Environment)。
 - [ ] 能解释为什么使用 `python -m pip`。
@@ -593,7 +593,7 @@ conda remove -n PY01 numpy
 - [ ] 能用依赖文件在新目录中重建环境。
 - [ ] 知道什么时候使用 `venv`，什么时候考虑 Conda。
 
-### 结构化补充（Structured Supplement）：参考资料
+### 参考资料
 
 - [Python Packaging User Guide：使用 pip 和 venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)
 - [Python 官方教程：虚拟环境 (Virtual Environment)与包](https://docs.python.org/3/tutorial/venv.html)

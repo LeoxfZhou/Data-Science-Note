@@ -10,8 +10,11 @@ published_at: 2026-08-11
 
 ## C++ 的定位、应用与 Python 对比（Positioning, Applications, and Python Comparison）
 
-> [!important] 技术纠错（Technical Correction）
+> [!important] 编译与运行模型（Compilation and Execution Model）
 > C++ 与现代 Python 实现不能简单概括为“一个编译、一个逐行解释”。C++ 通常提前编译为本机机器码（Native Machine Code）；CPython 通常先把源码编译为字节码（Bytecode），再由虚拟机（Virtual Machine）执行。性能还取决于算法、编译选项、运行时、扩展库与输入规模。现代 C++ 也不应默认依赖裸 `new`/`delete`：资源获取即初始化（Resource Acquisition Is Initialization, RAII）、标准容器（Standard Container）和智能指针（Smart Pointer）是更安全的默认方案。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> C++ 通常先把整份程序加工成机器能直接运行的可执行文件；CPython 则先生成字节码，再交给 Python 虚拟机执行。两者像“先把整本说明书翻译好再开工”和“先转成统一中间指令再由解释器调度”，但最终速度仍由算法和运行环境共同决定。
 
 ## C++ 与 Python 的对比
 - **速度与效率 (Speed and Efficiency)**：

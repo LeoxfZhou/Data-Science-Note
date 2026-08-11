@@ -100,9 +100,9 @@ inference_transform = v2.Compose([
 ])
 ```
 ### 3.3 v1 `transforms` 行为（Legacy v1 Transforms）
-- 原稿的 `transforms.Compose()`、`Resize()`、`RandomHorizontalFlip()`、`RandomVerticalFlip()`、`RandomRotation()`、`ToTensor()` 和 `Normalize()` 仍广泛存在。
+- v1 的 `transforms.Compose()`、`Resize()`、`RandomHorizontalFlip()`、`RandomVerticalFlip()`、`RandomRotation()`、`ToTensor()` 和 `Normalize()` 仍广泛存在于现有代码库中。
 - v1 `ToTensor()` 对常见 `uint8` PIL/NumPy 图像通常转换为 `float32` 并缩放到 `[0,1]`；对其他输入模式或 dtype 不应盲目假设缩放行为。
-- 原稿通过 `transforms.Lambda(lambda image: image.convert("RGB"))` 做通道防御。lambda 在需要序列化、TorchScript 或多进程 spawn 的环境中可移植性较差，优先在 Dataset 中显式 `convert("RGB")` 或定义顶层可调用对象。
+- `transforms.Lambda(lambda image: image.convert("RGB"))` 可以统一输入通道，但 lambda 在需要序列化、TorchScript 或多进程 spawn 的环境中可移植性较差；优先在 Dataset 中显式调用 `convert("RGB")`，或定义顶层可调用对象。
 ### 3.4 Albumentations
 - Albumentations 常用于高性能图像增强，并能同步变换图像、分割掩码和边界框。
 - `A.Compose([...])` 接受命名输入，通常通过 `transform(image=image_array)["image"]` 取结果。
@@ -172,7 +172,10 @@ loader = DataLoader(
 print([features.shape[0] for features, _ in loader])  # 输出: [4, 4, 2]
 ```
 ### 5.2 `drop_last` 与 BatchNorm（Drop-last and BatchNorm）
-- 原稿称 `drop_last=True` 可以“防止 BatchNorm 报错”。更准确地说，训练态 `BatchNorm1d` 在某些输入布局下遇到只有一个统计样本的尾批次可能报错或无法估计方差；丢弃尾批次是一种规避手段，不是 DataLoader 的普遍必需设置。
+- 训练态 `BatchNorm1d` 在某些输入布局下遇到只有一个统计样本的尾批次时，可能报错或无法可靠估计方差；`drop_last=True` 是一种规避手段，但不是 DataLoader 的普遍必需设置。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> Dataset 决定“第几个样本是什么”，Transform 决定“拿到样本后怎么加工”，DataLoader 决定“怎样分批、打乱并并行送给模型”。把三者分开后，数据读取、增强和批处理可以独立替换，也更容易定位错误。
 - 如果每个样本仍包含多个空间位置，BatchNorm2d 的统计样本数不一定只有 1；应根据实际输入形状判断。
 - 验证和测试通常不能随意 `drop_last=True`，否则指标漏算样本。
 ### 5.3 固定内存与异步传输（Pinned Memory and Non-blocking Transfer）

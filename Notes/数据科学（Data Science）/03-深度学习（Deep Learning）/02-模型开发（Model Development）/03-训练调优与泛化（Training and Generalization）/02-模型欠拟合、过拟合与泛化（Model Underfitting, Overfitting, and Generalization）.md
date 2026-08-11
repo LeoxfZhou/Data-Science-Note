@@ -21,6 +21,9 @@ published_at: 2026-08-11
 
 - 测试集应只用于最终无偏评估；日常诊断使用验证集。
 - “训练误差高/低”必须相对于任务基线、数据噪声和可达到上限判断。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 欠拟合像学生连课本例题都不会，说明能力或训练不足；过拟合像学生只背熟了练习册答案，换一道题就不会。泛化就是既能学会训练数据里的规律，又没有把偶然噪声当成规律记住。
 ## 2. 欠拟合原因与对策（Underfitting Causes and Remedies）
 ### 2.1 模型容量不足（Insufficient Model Capacity）
 - 网络层数、宽度、通道数或特征交互不足，假设空间无法表达目标规律。
@@ -99,7 +102,12 @@ print(training_output.shape)       # 输出: torch.Size([1000])
 - BatchNorm 使用 mini-batch 统计时引入随机性，可能产生轻量正则化效果，但其主要职责是改善优化和信号尺度。
 - 小 batch 的统计不稳定时可考虑 GroupNorm（Group Normalization, GN）或 LayerNorm（Layer Normalization, LN）。
 - 序列模型常用 LayerNorm；风格迁移常见 InstanceNorm（Instance Normalization, IN）；具体选择取决于张量轴和任务。
-- 不应把 BatchNorm 当作 Dropout 的普遍替代品，二者机制不同。
+- BatchNorm 与 Dropout 的机制、训练/推理状态和适用条件不同，二者不能互相替代。
+- **原论文动机**：BatchNorm 通过规范化小批次内的中间激活，试图减少内部协变量偏移（Internal Covariate Shift），从而稳定训练。
+- **后续演化/现代理解**：后续研究还从优化地形平滑、重参数化、尺度稳定、梯度传播和正则化效应等角度解释 BatchNorm；其训练收益通常由多种机制共同形成。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> BatchNorm 在训练时先用当前小批次估计均值和方差，再用可学习参数重新缩放；同时把统计量逐步记录下来。推理时不能再依赖“当前这一批碰巧有哪些样本”，因此改用训练期间保存的运行统计。忘记切换 `eval()`，同一个样本就可能因为和不同样本凑成一批而得到不同结果。
 ## 9. CNN 完整工作流（Complete CNN Workflow）
 ```text
 数据输入

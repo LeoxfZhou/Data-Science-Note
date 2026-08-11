@@ -17,7 +17,7 @@ source:
 Pandas 在 `ndarray` 的基础上构建出了两种更适用于数据分析的存储结构，分别是 **Series**（一维数据结构）和 **DataFrame**（二维数据结构）。在操作 Series 和 DataFrame 时，基本上可以看成是 NumPy 中的一维和二维数组 (Array)来操作，数组 (Array)的绝大多数操作它们都可以适用。
 ---
 ### 二、 Pandas Series
-#### 结构化补充（Structured Supplement）：核心对象
+#### 核心对象
 
 - `Series`：带索引 (Index)的一维数据。
 - `DataFrame`：由行索引 (Index)和列标签组织的二维表格。
@@ -42,7 +42,10 @@ print(frame.head())
 
 Pandas 会按照索引标签 (Index Label)对齐数据。这非常强大，但也可能在索引 (Index)不一致时产生意外的 `NaN`。
 
-#### 结构化补充（Structured Supplement）：Series (Series) 详细操作
+> [!tip] 大白话理解（Plain-language Intuition）
+> Pandas 做运算时先看“行名和列名是否对应”，而不只是看它们处在第几个位置。像把两份名单按姓名对齐后再计算：一边缺少某个姓名时，没有可配对的值，于是结果出现 `NaN`。
+
+#### Series (Series) 详细操作
 
 `Series` 由值数组 (Values) 和索引 (Index) 组成。算术运算会按索引标签 (Index Label)对齐，而不是单纯按位置对齐。
 
@@ -315,7 +318,7 @@ print(ser1 / ser2)     # a    7.5
 
 ---
 ### 三、 Pandas DataFrame
-#### 结构化补充（Structured Supplement）：DataFrame (DataFrame) 创建方式
+#### DataFrame (DataFrame) 创建方式
 
 ```python
 import numpy as np
@@ -350,7 +353,7 @@ from_dict["source"] = "manual"
 
 赋值 Series 时按照索引 (Index)对齐；如果只想按位置赋值，应先确认长度，再使用 `.to_numpy()`，但要清楚这样会放弃标签安全性。
 
-#### 结构化补充（Structured Supplement）：常见错误 (Error)
+#### 常见错误 (Error)
 
 - 忽略索引 (Index)对齐，导致计算后出现意外 `NaN`。
 - 使用链式索引 (Index)赋值。
@@ -422,7 +425,7 @@ print(df)                     #        p1   p2     p3
 ```
 
 #### 2. 访问 DataFrame 数据
-##### 结构化补充（Structured Supplement）：选择行和列
+##### 选择行和列
 
 ```python
 scores = frame["score"]
@@ -444,7 +447,7 @@ selected = frame.loc[
 
 不要写 `condition_a and condition_b`，因为 Python 的 `and` 不能逐元素组合 (Composition) Series。
 
-##### 结构化补充（Structured Supplement）：索引 (Index) 设计
+##### 索引 (Index) 设计
 
 默认的 `RangeIndex` 对大多数清洗流程已经足够。只有索引 (Index)具有明确业务意义，并且确实需要标签对齐 (Label Alignment)时才设置业务索引 (Index)。
 
@@ -546,7 +549,7 @@ print(df.iloc[[2, 1], [1, 0]])          #     age   name
 ```
 
 #### 3. 修改 DataFrame 索引 (Index)与数据
-##### 结构化补充（Structured Supplement）：安全赋值
+##### 安全赋值
 
 ```python
 # 使用 .loc 明确指定行和列，避免链式索引造成赋值不确定。
@@ -677,7 +680,7 @@ print(df)
 ```
 
 #### 4. DataFrame 常用属性
-##### 结构化补充（Structured Supplement）：读取数据后的第一轮检查
+##### 读取数据后的第一轮检查
 
 ```python
 import pandas as pd
@@ -714,7 +717,7 @@ print(frame["id"].is_unique)
 # 输出说明: 按 `print()` 的出现顺序输出上方已构造对象的当前值；若输出包含内存地址 (Memory Address)、随机数 (Random Number)、平台路径 (Path)或版本 (Version)信息，具体字符可能随运行环境变化。
 ```
 
-##### 结构化补充（Structured Supplement）：类型系统 (Type System) 与内存
+##### 类型系统 (Type System) 与内存
 
 ```python
 frame = frame.convert_dtypes()
@@ -788,7 +791,7 @@ print(df.values)  # 转换为 NumPy 数组（不含索引和列名）
 
 ---
 ### 四、 DataFrame 常用方法
-#### 结构化补充（Structured Supplement）：文本、日期与去重 (Deduplication)
+#### 文本、日期与去重 (Deduplication)
 
 ```python
 frame["name"] = frame["name"].str.strip().str.lower()
@@ -803,7 +806,7 @@ frame = (
 
 去重 (Deduplication)前先确定重复的业务定义；整行相同、主键相同和部分字段相同不是同一个问题。
 
-#### 结构化补充（Structured Supplement）：一个可复用的清洗管道
+#### 一个可复用的清洗管道
 
 ```python
 import pandas as pd
@@ -834,7 +837,7 @@ def clean_samples(frame: pd.DataFrame) -> pd.DataFrame:
     return cleaned
 ```
 
-#### 结构化补充（Structured Supplement）：方法链 (Method Chaining) 与 `pipe()`
+#### 方法链 (Method Chaining) 与 `pipe()`
 
 ```python
 def keep_valid_scores(frame: pd.DataFrame) -> pd.DataFrame:
@@ -859,7 +862,7 @@ assert result["score"].between(0, 1).all()
 ```
 
 #### 1. 缺失值 (Missing Value)检测
-##### 结构化补充（Structured Supplement）：缺失值 (Missing Value)与类型转换 (Type Conversion)
+##### 缺失值 (Missing Value)与类型转换 (Type Conversion)
 
 ```python
 import pandas as pd
@@ -984,7 +987,7 @@ print(df2)
 ```
 
 #### 4. 拼接 (Concatenation)
-##### 结构化补充（Structured Supplement）：合并 (Merge)与拼接 (Concatenation)
+##### 合并 (Merge)与拼接 (Concatenation)
 ###### `merge`
 
 ```python
@@ -1068,7 +1071,7 @@ print(pd.concat([df, df2], axis=1, join='inner'))
 ```
 
 #### 5. 合并 (Merge)
-##### 结构化补充（Structured Supplement）：`merge()` 连接类型 (Join Types) 详解
+##### `merge()` 连接类型 (Join Types) 详解
 
 | `how` | 保留的键 |
 |---|---|
@@ -1203,7 +1206,7 @@ print(df)
 ```
 
 #### 7. 删除缺失值 (Missing Value)
-##### 结构化补充（Structured Supplement）：缺失值 (Missing Values) 详细规则
+##### 缺失值 (Missing Values) 详细规则
 
 Pandas 中常见缺失标记：
 
@@ -1660,7 +1663,7 @@ print(df)
 ```
 
 #### 12. 排序 (Sorting)
-##### 结构化补充（Structured Supplement）：排序 (Sorting)、重塑与透视表 (Pivot Table)
+##### 排序 (Sorting)、重塑与透视表 (Pivot Table)
 
 ```python
 ordered = frame.sort_values(
@@ -1687,7 +1690,7 @@ long_frame = wide_frame.melt(
 )
 ```
 
-##### 结构化补充（Structured Supplement）：采样 (Sampling)、排序 (Sorting)和重复值
+##### 采样 (Sampling)、排序 (Sorting)和重复值
 
 ```python
 sample = frame.sample(n=100, random_state=42, replace=False)
@@ -2050,7 +2053,7 @@ print(df)
 ```
 
 ## 进阶补充与核对（Advanced Supplements and Verification）
-### 结构化补充（Structured Supplement）：分组：split-apply-combine
+### 分组：split-apply-combine
 #### 聚合（Aggregation）
 
 ```python
@@ -2077,7 +2080,7 @@ frame["score_centered"] = frame["score"] - group_mean
 - `transform()` 用于把组级结果对齐回原始行。
 - 自定义 `apply()` 更灵活，但通常更慢；能用内置聚合 (Aggregation)或向量化 (Vectorization)操作时优先不用它。
 
-### 结构化补充（Structured Supplement）：GroupBy (GroupBy) 详细接口
+### GroupBy (GroupBy) 详细接口
 #### 单个聚合 (Aggregation)与多个聚合 (Aggregation)
 
 ```python
@@ -2114,7 +2117,7 @@ ordered["rolling_mean"] = (
 )
 ```
 
-### 结构化补充（Structured Supplement）：文件读写与大文件
+### 文件读写与大文件
 
 ```python
 frame.to_csv("cleaned.csv", index=False, encoding="utf-8")
@@ -2136,7 +2139,7 @@ for chunk in pd.read_csv("large.csv", chunksize=100_000):
 
 分块只降低单次内存占用；跨块去重 (Deduplication)、全局排序 (Sorting)和全局统计需要额外设计状态。
 
-### 结构化补充（Structured Supplement）：日期时间 (Datetime) 与时间序列 (Time Series)
+### 日期时间 (Datetime) 与时间序列 (Time Series)
 
 ```python
 import pandas as pd
@@ -2172,7 +2175,7 @@ hourly = (
 )
 ```
 
-### 结构化补充（Structured Supplement）：窗口操作 (Window Operations)
+### 窗口操作 (Window Operations)
 
 ```python
 series = frame["value"]
@@ -2186,7 +2189,7 @@ frame["ewm_mean"] = series.ewm(span=7, adjust=False).mean()
 - 扩展窗口 (Expanding Window)：从起点累积到当前行。
 - 指数加权窗口 (Exponentially Weighted Window)：越近的数据权重越大。
 
-### 结构化补充（Structured Supplement）：`map()`、`apply()` 与向量化 (Vectorization)
+### `map()`、`apply()` 与向量化 (Vectorization)
 
 ```python
 label_names = {0: "negative", 1: "positive"}
@@ -2203,7 +2206,7 @@ frame["name_length"] = frame["name"].str.len()  # 向量化字符串接口。
 4. 无法表达时才使用 `DataFrame.apply(axis=1)`。
 5. `iterrows()` 通常最慢，并可能改变行内类型；确需迭代时考虑 `itertuples()`。
 
-### 结构化补充（Structured Supplement）：完成检查
+### 完成检查
 
 - [ ] 能在读取后检查形状、类型、缺失、重复和主键。
 - [ ] 能正确使用 `.loc`、`.iloc` 和布尔筛选。
@@ -2211,7 +2214,7 @@ frame["name_length"] = frame["name"].str.len()  # 向量化字符串接口。
 - [ ] 能解释索引 (Index)对齐和链式赋值 (Chained Assignment)风险。
 - [ ] 能把数据清洗 (Data Cleaning)写成输入明确、返回新表的函数 (Function)。
 
-### 结构化补充（Structured Supplement）：参考资料
+### 参考资料
 
 - [Pandas User Guide](https://pandas.pydata.org/docs/user_guide/)
 - [10 minutes to pandas](https://pandas.pydata.org/docs/user_guide/10min.html)

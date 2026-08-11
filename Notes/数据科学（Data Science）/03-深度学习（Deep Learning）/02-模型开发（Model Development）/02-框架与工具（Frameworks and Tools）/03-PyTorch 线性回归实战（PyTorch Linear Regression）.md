@@ -18,7 +18,7 @@ $$
 \hat{y}=wx+b
 $$
 - `w` 是权重（Weight），`b` 是偏置（Bias），$\hat{y}$ 是预测值（Prediction），$y$ 是真实目标（Target）。
-- 原稿使用 `sklearn.datasets.make_regression()` 生成 100 个样本、1 个特征、噪声强度 10、真实偏置 14.5 的数据，并要求返回真实系数用于比较。
+- 示例使用 `sklearn.datasets.make_regression()` 生成 100 个样本、1 个特征、噪声强度 10、真实偏置 14.5 的数据，并返回真实系数用于比较。
 ### 1.2 均方误差（Mean Squared Error）
 对 $N$ 个样本，均方误差（Mean Squared Error, MSE）为：
 $$
@@ -93,9 +93,9 @@ print(type(optimizer).__name__)         # 'SGD'
 5. `loss.backward()` 计算并累积梯度。
 6. `optimizer.step()` 更新参数。
 ### 3.2 Epoch 损失统计（Epoch Loss Accounting）
-- 原稿把 `total_loss` 和 `train_sample` 放在 epoch 循环外，因此 `epoch_loss` 实际记录“从训练开始到当前 epoch 的所有批次累计平均”，而不是每个 epoch 自身平均。
+- `total_loss` 和 `train_sample` 必须在每个 epoch 开头重置；如果把它们放在 epoch 循环外，`epoch_loss` 会变成“从训练开始到当前 epoch 的累计平均”，而不是当前 epoch 的平均损失。
 - 如果目标是画每个 epoch 的损失，应在每个 epoch 开头重置累计值。
-- 原稿注释把每批样本计数写成 `+1`，实际增加的是“批次数”。对最后一个小批次，应按 `batch_size` 加权才得到严格样本平均。
+- 每个 batch 只把计数器加 1 得到的是批次数；要计算严格的样本平均，必须按 `batch_x.shape[0]` 累加样本数，使最后一个小批次按其实际大小加权。
 ```python
 for epoch in range(epochs):
     model.train()
@@ -241,17 +241,20 @@ if __name__ == "__main__":
 > 该程序会打印训练权重、偏置、真实权重与 `torch.Size([100, 1])`，并打开两幅图。具体浮点值受 PyTorch 版本与数值实现影响；可靠预期是学习权重接近 `make_regression` 返回系数、偏置接近 14.5，且损失总体下降。
 ![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/02-模型开发（Model Development）/02-框架与工具（Frameworks and Tools）/03-PyTorch 线性回归实战（PyTorch Linear Regression）/03-PyTorch 线性回归实战（PyTorch Linear Regression）-20260328152713641.png|训练损失曲线]]
 ![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/02-模型开发（Model Development）/02-框架与工具（Frameworks and Tools）/03-PyTorch 线性回归实战（PyTorch Linear Regression）/03-PyTorch 线性回归实战（PyTorch Linear Regression）-20260328152714017.png|训练拟合与真实直线]]
-## 5. 原稿实现纠错（Corrections to the Source Implementation）
+## 5. 实现选择与工程边界（Implementation Choices and Engineering Boundaries）
 
-|原稿行为（Source Behavior）|问题（Problem）|本稿处理（Correction）|
+|实现要点（Implementation Point）|推荐做法（Recommended Practice）|原因（Reason）|
 |---|---|---|
-|先创建默认 NumPy dtype 的张量，每批再 `.type(torch.float32)`|重复转换；类型意图分散|数据入口直接设为 `torch.float32`|
-|目标保持 `(N,)`，训练时每批 `reshape(-1,1)`|形状处理重复，易出现广播警告|数据入口统一为 `(N,1)`|
-|`total_loss`、`train_sample` 在全部 epoch 外累计|曲线是累计平均，不是逐 epoch 平均|每个 epoch 重置并按样本数加权|
-|把每个批次计数加 1|最后小批次与完整批次权重相同|按 `batch_x.shape[0]` 累加样本数|
-|训练后直接用模型预测绘图|建立无用计算图|`model.eval()` 配合 `torch.inference_mode()`|
-|用 Python 列表逐元素计算 `v * weight + bias` 再构造张量|低效，且容易产生复制/梯度警告|直接批量调用 `model(x_line)`|
-|未固定模型初始化和 DataLoader 随机顺序|多次运行难以比较|同时设置全局随机种子与 DataLoader 生成器|
+|张量数据类型（Tensor Dtype）|在数据入口直接指定 `torch.float32`|避免每批重复转换，并集中表达类型意图|
+|目标形状（Target Shape）|在数据入口统一为 `(N,1)`|避免训练时重复变形和意外广播警告|
+|Epoch 损失统计（Loss Accounting）|每个 epoch 重置累计量并按样本数加权|确保曲线表示逐 epoch 样本平均，而不是跨 epoch 累计平均|
+|批次计数（Batch Counting）|按 `batch_x.shape[0]` 累加样本数|避免把不完整尾批次与完整批次赋予相同权重|
+|推理绘图（Inference Plotting）|结合 `model.eval()` 与 `torch.inference_mode()`|避免建立无用计算图，并正确切换状态相关模块|
+|批量预测（Batched Prediction）|直接调用 `model(x_line)`|避免 Python 逐元素循环、额外复制和梯度警告|
+|可复现性（Reproducibility）|同时设置全局随机种子与 DataLoader 生成器|使参数初始化和批次顺序在多次运行间可比较|
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 线性回归就是寻找一条最贴近样本的直线。损失函数衡量“这条线离所有真实点总体有多远”，梯度告诉参数怎样移动能让距离变小；训练循环只是反复计算误差、求梯度、移动直线，直到继续调整带来的改善很小。
 
 ## 6. 诊断与改进（Diagnostics and Improvements）
 ### 6.1 损失不下降（Loss Does Not Decrease）
