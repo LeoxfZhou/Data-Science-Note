@@ -1,0 +1,116 @@
+---
+title: 集成学习方法（Ensemble Learning Methods）
+status: review
+reviewed_at: 2026-08-11
+source:
+  - "Processing/00-Inbox/数据科学（Data Science）/02-机器学习（Machine Learning）/01-集成学习（Ensemble Learning）/集成学习.md"
+suggested_target: "Notes/数据科学（Data Science）/02-机器学习（Machine Learning）/01-集成学习（Ensemble Learning）/01-集成学习方法（Ensemble Learning Methods）.md"
+operation: 新建
+merge_target: null
+---
+
+# 集成学习方法（Ensemble Learning Methods）
+## 1. 核心思想（Core Idea）
+- 集成学习（Ensemble Learning）把多个分类器（Classifier）或回归器（Regressor）组合成一个新学习器，希望获得比单一模型更稳定或更准确的预测。
+- 弱学习器（Weak Learner）通常指性能只略好于随机猜测的学习器；在二分类语境中常表述为错误率低于 `0.5`，但这一阈值不能直接套用到类别不平衡或多分类任务。
+- 集成成功通常依赖两个条件：单个学习器具有一定有效性，并且学习器之间具有多样性（Diversity）。如果所有模型在相同样本上犯相同错误，简单增加模型数量不会带来明显收益。
+- 不稳定学习算法（Unstable Learning Algorithm）对训练数据扰动较敏感，通过重采样构造多个模型后往往更容易获得方差下降，例如未剪枝决策树（Decision Tree）。
+
+## 2. 为什么使用集成（Why Ensembles Work）
+- 多个学习器的投票或平均可以形成更合理的决策边界（Decision Boundary），降低单一模型偶然错误对最终结果的影响。
+- 数据集过大时可对数据分区训练；数据集较小时可通过有放回抽样（Sampling with Replacement）产生不同数据子集。两者目的不同：前者侧重计算可扩展性，后者侧重构造差异化样本。
+- 单个线性模型难以表达复杂边界时，可以组合多个基模型得到非线性决策结构。
+- 不同特征集（Feature Set）可以分别训练异构模型，再在预测层融合；这种做法需要防止验证集或测试集信息泄漏到融合器。
+- 常见体系包括装袋法（Bagging）、提升法（Boosting）和堆叠法（Stacking）。原稿详细展开前两类，只列出 Stacking 名称，后续需单独补充其无泄漏训练流程。
+
+## 3. 装袋法（Bagging）
+### 3.1 自举汇聚（Bootstrap Aggregating）
+- Bagging 是 Bootstrap Aggregating 的缩写，可译为自举汇聚法或装袋法。
+- 从包含 `n` 个样本的原始训练集中执行有放回自举采样（Bootstrap Sampling），每次通常抽取 `n` 次，得到多个训练子集，并分别训练多个基学习器。
+- 分类任务通常使用多数投票（Majority Voting）或类别概率平均；回归任务通常对预测值求均值（Averaging）。
+- 各个基学习器相互独立时可并行训练；最终集成通过平均减少方差（Variance），但不保证消除系统性偏差（Bias）。
+
+### 3.2 袋外数据（Out-of-Bag Data）
+- 对单个大小为 `n` 的自举样本，一个原始样本一次都未被抽中的概率为 `(1 - 1/n)^n`；当 `n` 较大时趋近 `e^-1 ≈ 0.368`。
+- 因此，每个子模型平均约有 `36.8%` 的原始样本未参与该子模型训练，这部分样本称为袋外数据（Out-of-Bag Data, OOB）。
+- 可使用每个样本对应的袋外模型预测来估计泛化误差，但 OOB 评估仍不能替代部署前针对真实目标分布设计的独立测试。
+
+## 4. 随机森林（Random Forest）
+### 4.1 基本原理（Basic Principle）
+1. 使用 Bootstrap 采样为每棵树生成样本子集。
+2. 训练决策树的每个节点时，从全部特征中随机抽取 `K` 个候选特征。
+3. 只在这 `K` 个特征中寻找当前节点的最佳划分。
+4. 重复以上过程建立 `m` 棵树，分类时投票，回归时平均。
+
+样本随机性降低树之间的相关性，特征随机性进一步增加多样性；两者共同构成随机森林（Random Forest, RF）的关键。
+
+### 4.2 优点（Advantages）
+- 多棵树可以并行化（Parallelization）训练，对大规模样本具有工程速度优势。
+- 随机选择候选划分特征，使其能处理高维数据（High-dimensional Data），并降低少数强特征主导所有树的概率。
+- 可输出特征重要性（Feature Importance），但不同重要性算法具有偏差，不能把重要性直接解释为因果关系。
+- 相比单棵深树通常具有更小方差和更强泛化能力（Generalization Ability），能够缓解过拟合（Overfitting）。
+
+### 4.3 局限（Limitations）
+- 在噪声较大、标签质量差或数据分布发生变化时仍可能过拟合，随机化并不能消除错误数据产生的偏差。
+- 基于不纯度下降的特征重要性可能偏向取值较多或可产生更多切分点的特征。
+- 大量深树会增加内存占用、预测延迟和模型解释难度。
+
+### 4.4 常见变种（Variants）
+- **极端随机树（Extra Trees）**：原稿称每棵树直接使用全部原始数据且随机选择划分值。实际实现可配置是否使用 Bootstrap；核心差异是对候选特征的划分阈值进行更强随机化，通常进一步降低方差但可能增加偏差。
+- **完全随机树嵌入（Totally Random Trees Embedding, TRTE）**：使用随机树叶节点形成的高维稀疏表示转换原始数据，是一种无监督特征映射方式。
+- **孤立森林（Isolation Forest）**：用于异常检测（Anomaly Detection），通过随机选择特征和切分阈值隔离样本；异常点通常更容易在较短路径上被隔离。它不需要构建“深度越大越好”的树，路径长度才是核心信号。
+
+## 5. 提升法（Boosting）
+- Boosting 按顺序迭代训练弱学习器，并把每轮模型加权累加到总模型中。
+- 后一轮学习器会针对前面模型尚未处理好的部分继续优化，因此各学习器之间存在依赖，通常不能像 Bagging 那样完全并行训练。
+- 如果每一步沿损失函数的负梯度方向构造增量模型，属于梯度提升（Gradient Boosting）。常见算法包括 AdaBoost 和梯度提升决策树（Gradient Boosting Decision Tree, GBDT）。
+
+## 6. AdaBoost（Adaptive Boosting）
+### 6.1 算法原理（Algorithm Principle）
+- AdaBoost 在每轮评估训练样本的重要性：正确分类的样本权重下降，错误分类的样本权重上升，使后续基分类器更关注难分样本。
+- 最终强分类器（Strong Classifier）是基分类器的加权线性组合：误差较小的基分类器权重较大，误差较大的基分类器权重较小；二分类结果通常再通过符号函数（Sign Function）得到类别。
+- “弱分类器错误率小于 `0.5`”是经典二分类 AdaBoost 推导中的关键条件；若弱学习器不优于随机猜测，需要停止、调整方向或重新检查数据与实现。
+
+### 6.2 优点与局限（Advantages and Limitations）
+- **优点**：可处理连续和离散特征；结构相对直观；在基学习器适合且数据质量较好时具有较强预测能力。
+- **原稿表述**：模型鲁棒性（Robustness）较强。
+- **必要边界**：AdaBoost 会持续提高错分样本权重，因此对标签噪声和异常样本（Outlier）可能非常敏感；“鲁棒性强”不能脱离数据质量直接断言。
+
+## 7. 梯度提升决策树（GBDT）
+### 7.1 基本原理（Basic Principle）
+- GBDT 是以回归树（Regression Tree，通常为 CART）作为基学习器的 Boosting 方法；即使最终任务是分类，每一轮树通常拟合的是损失函数在当前模型处的负梯度，而不是直接训练分类树。
+- 对平方误差回归，负梯度等于真实值与当前预测之间的残差（Residual），所以可直观表述为“拟合残差”。对于一般损失函数，更准确的表述是拟合伪残差（Pseudo-residual）或负梯度。
+- 新树的输出乘以学习率（Learning Rate），也称收缩率（Shrinkage），再累加到当前模型。较小学习率通常需要更多树，但常能改善泛化。
+
+### 7.2 核心构成（Core Components）
+- **回归决策树（Regression Decision Tree）**：拟合当前负梯度方向。
+- **梯度提升（Gradient Boosting）**：以加法模型逐轮降低指定损失函数。
+- **收缩（Shrinkage）**：使用学习率缩小每棵新树的贡献，控制单轮更新幅度并缓解过拟合。
+
+### 7.3 损失函数（Loss Functions）
+- 回归任务常用均方误差（Mean Squared Error, MSE）或绝对误差（Absolute Error）。绝对误差对异常值更不敏感，但优化细节与平方误差不同。
+- 分类任务常使用对数损失（Log Loss），原稿也称 Deviance；具体形式取决于二分类还是多分类。
+
+### 7.4 优点与局限（Advantages and Limitations）
+- **优点**：可处理连续和离散特征；在合理默认参数和少量调参下常能取得有竞争力的表格数据结果；可通过损失函数适配回归和分类任务。
+- **原稿表述**：模型鲁棒性较强。实际鲁棒性取决于损失函数、树深、学习率、样本噪声和异常值处理，不能一概而论。
+- **缺点**：弱学习器前后依赖，难以完全并行训练；树数较多时训练和推理速度都会增加；过深的树、过大的学习率或数据泄漏仍会导致过拟合。
+
+## 8. Bagging 与 Boosting 对比（Bagging vs. Boosting）
+
+|维度|Bagging|Boosting|
+|---|---|---|
+|训练关系|基学习器相对独立|基学习器按顺序依赖前序结果|
+|主要目标|通过平均或投票降低方差|逐轮修正错误或沿负梯度降低损失|
+|数据处理|常使用 Bootstrap 重采样|常调整样本权重或拟合负梯度|
+|并行性|较强|通常较弱|
+|典型算法|随机森林|AdaBoost、GBDT|
+|主要风险|树数量带来的资源开销、相关树无法充分降方差|噪声敏感、串行训练、学习率与树复杂度不当导致过拟合|
+
+## 9. 候选稿处理信息（Review Metadata）
+- **来源文件（Source File）**：`Processing/00-Inbox/数据科学（Data Science）/02-机器学习（Machine Learning）/01-集成学习（Ensemble Learning）/集成学习.md`。
+- **建议目标位置（Suggested Target）**：`Notes/数据科学（Data Science）/02-机器学习（Machine Learning）/01-集成学习（Ensemble Learning）/01-集成学习方法（Ensemble Learning Methods）.md`。
+- **建议操作（Suggested Operation）**：新建。
+- **合并对象（Merge Target）**：无。
+- **不确定事项（Open Questions）**：原稿未展开 Stacking；为避免无来源扩写，本轮只保留其方法定位，后续可在独立专题补全无泄漏训练流程。
+
