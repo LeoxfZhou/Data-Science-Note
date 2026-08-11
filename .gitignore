@@ -3,14 +3,20 @@
 **/.DS_Store
 
 # Obsidian workspace state records open tabs and local UI layout, not note content.
-.obsidian/workspace.json
-.obsidian/workspace-mobile.json
-.obsidian/cache/
+/.obsidian/
 .trash/
 
-# Obsidian Git may generate machine-specific authentication helpers and runtime data.
-.obsidian/plugins/obsidian-git/obsidian_askpass.sh
-.obsidian/plugins/obsidian-git/data.json
+# Processing contains Inbox originals, review metadata, source paths, recovery
+# snapshots, and possibly private course information. Keep the workflow local.
+/Processing/
+
+# Inbox and Processed attachments belong to the private workflow. Only attachment
+# copies referenced by published knowledge notes under Attachments/Notes are public.
+/Attachments/Processing/
+
+# Course guides, assignment requirements, contact details, cloud-drive links,
+# access codes, and review-only material are local archives, not public notes.
+/Notes/**/00-课程与作业指南/
 
 # Python environments and caches should be rebuilt from dependency files.
 .venv/

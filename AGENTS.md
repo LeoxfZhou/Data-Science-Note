@@ -106,6 +106,50 @@ README 目录规则如下：
 5. **目录节点（Directory Nodes）**：文件夹使用普通无序列表项表示，Markdown 文件使用带链接的子列表项表示；列表中不加入 `.obsidian/`、Attachments 或 Processing 的内部文件。
 6. **同步校验（Synchronization Check）**：更新后比较 `Notes/` 中 Markdown 文件数量与 README 笔记链接数量，并逐个验证相对链接目标存在；数量或目标不一致时不得宣称入库完成。
 
+### 2.6 附件迁移与 Attachment Management 同步（Attachment Migration and Attachment Management Synchronization）
+
+笔记在 Inbox、Review、Notes 和 Processed 之间移动或生成正式副本时，必须先读取 `.obsidian/plugins/attachment-management/data.json` 中的当前设置，并按照插件的真实根目录、附件路径模板、文件名模板和自动重命名选项处理附件；不得假设配置长期不变。
+
+附件处理规则如下：
+1. **路径同步（Path Synchronization）**：笔记正式写入 `Notes/` 时，知识正文使用的附件必须同步复制或移动到 Attachment Management 为正式笔记计算出的目标目录，并更新正文中的 Wiki Link 或 Markdown Link；不得让正式笔记长期引用 `Attachments/Processing/00-Inbox/...`。
+2. **正式副本与原稿恢复（Published Copy and Original Recovery）**：如果 Inbox 原稿也需要归档到 Processed，正式 Notes 使用独立的附件副本；原始附件则随原稿进入对应 Processed 附件路径，确保正式笔记不会因最近三批清理而丢图，Processed 原稿仍具备恢复能力。
+3. **命名规则（Naming Rule）**：附件重命名必须遵循插件当前 `attachFormat` 和 `dateFormat`；能够从旧文件名可靠保留原时间标识时，应保留时间部分，只替换与新笔记不一致的笔记名前缀。
+4. **引用更新（Reference Update）**：附件路径或文件名改变后，必须更新所有受影响笔记中的 `![[...]]`、`[[...]]` 和 Markdown 图片链接，并逐个验证目标存在。不能只移动文件而不修改引用。
+5. **图片优先保留（Image Preservation First）**：图片、图表、截图和其他视觉附件默认保留，即使正文能够用文字概括，也不得擅自视为冗余附件删除。
+6. **删除需审核（Deletion Requires Review）**：任何图片附件如需删除，必须先在 Review 批次说明中列出文件、引用位置、删除理由和替代信息，并获得用户明确同意；未批准时继续保留。
+7. **孤立附件检查（Orphan Check）**：完成迁移后检查旧路径、正式路径和 Processed 路径，确认没有引用断裂、误覆盖或因同名文件导致的错误解析。发现无法确定归属的附件时移入 Review 判断，不直接删除。
+8. **插件能力边界（Plugin Capability Boundary）**：如果当前执行环境不能直接调用 Obsidian 插件命令，可以按插件配置执行等价的文件操作与引用更新；不得因此跳过路径同步或修改 `.obsidian/` 配置。
+
+### 2.7 GitHub 隐私与公开范围（GitHub Privacy and Publication Scope）
+
+GitHub 仓库只公开长期知识类笔记及其必要附件。课程组织、作业与审核材料、联系信息、网盘资源、访问凭据、Inbox 原稿、Review 元数据和 Processed 恢复副本只保存在本地 Vault。
+
+Git 隐私规则如下：
+1. **Processing 本地化（Local-only Processing）**：根目录 `/Processing/` 与 `/Attachments/Processing/` 必须写入 `.gitignore`，不得上传 Inbox、Review、Processed、其来源路径、处理说明、恢复快照或恢复附件。
+2. **课程资料本地化（Local-only Course Materials）**：`/Notes/**/00-课程与作业指南/` 必须写入 `.gitignore`。课程资料仍可进入本地 Notes 并在 Obsidian 中使用，但不能出现在 GitHub 提交中。
+3. **Obsidian 本机配置本地化（Local-only Obsidian Configuration）**：`/.obsidian/` 必须保持 Git 忽略。插件源码、工作区布局、认证辅助文件和本机插件设置不属于知识笔记；Codex 仍可读取本地配置来执行附件规则，但不得上传。
+4. **知识附件可公开（Knowledge Attachments May Be Public）**：正式知识笔记实际引用并已同步到 `/Attachments/Notes/` 的图片和附件可以上传；包含个人身份、邮箱、访问码、付费资源凭据或其他敏感信息的附件必须保持忽略或在 Review 中等待脱敏判断。
+5. **已跟踪文件处理（Already-tracked Files）**：`.gitignore` 不会自动停止跟踪已经进入 Git 索引的文件。发现隐私文件已被跟踪时，必须使用保留本地文件的方式从索引移除，并验证 `git ls-files` 不再列出目标；不得为此删除本地资料。
+6. **README 公开目录（Public README Index）**：README 只列出可公开的正式知识笔记。被 `.gitignore` 排除的课程、作业和私人资料不得出现在 GitHub 目录树中，即使它们本地位于 Notes。
+7. **提交前隐私检查（Pre-commit Privacy Check）**：提交或推送前扫描暂存内容中的邮箱、电话号码、提取码、令牌、密码、私有链接和 `00-课程与作业指南` 路径；发现疑似敏感信息时停止推送并报告。
+
+### 2.8 格式规则自动沉淀（Automatic Formatting Rule Incorporation）
+
+- 用户提出新的通用排版、命名、目录、附件或笔记生命周期规则时，Codex 有权并且必须在执行本次改动的同时自动写入根目录 `AGENTS.md`，不需要等待用户再次提醒。
+- 只有适用于后续笔记的通用规则才写入；只针对某一篇笔记的临时内容要求不得误写成全局规则。
+- 新规则必须与现有规范合并到最相关章节，避免在文件末尾重复堆放同义规则；出现冲突时保留用户最新明确要求，并同步更新工作流程与自检清单。
+- 自动写入后必须报告新增或修改了哪些规则，并验证 `AGENTS.md` 内部不存在互相矛盾的要求。
+
+### 2.9 Jupyter Notebook 转换（Jupyter Notebook Conversion）
+
+- `Processing/00-Inbox/` 中的 `.ipynb` 文件可以作为正式知识来源整理为 Markdown 候选笔记，但不得直接覆盖、删除或移动原 notebook；只有候选稿通过人工审核并正式入库后，原 notebook 才随同批原稿进入 `Processing/02-Processed/`。
+- 转换前必须逐个读取 Markdown 单元格（Markdown Cell）、代码单元格（Code Cell）、已保存输出（Saved Output）、执行顺序、内核与语言版本元数据；不能只提取代码而丢失解释、错误输出、警告或环境信息。
+- notebook 内容应按技术主题重构，不要求机械保持原单元格顺序；跨单元格依赖的变量、导入和随机状态必须在 Markdown 代码示例中补齐，使示例可以独立阅读和运行。
+- 原 notebook 的随机数值输出可改为固定随机种子后的可复现输出，或改为稳定的形状、类型和性质断言；此类调整只用于消除随机噪声，不得删去原示例所证明的知识点。
+- 发现过时内核、旧 API、环境差异或已保存输出与当前代码不一致时，必须在 Review 中记录冲突并依据官方文档纠正，不能默认为任一版本正确。
+- notebook 的图片输出、图表和外部附件必须按 Attachment Management 当前规则提取或复制到 Review 附件目录并保持引用有效；未经用户明确同意不得删除视觉输出。
+- notebook 魔法命令（Magic Command）、Shell 命令和依赖外部状态的单元格必须标明运行环境与副作用；代码输出继续遵循第 7 节的短输出与复杂输出规范。
+
 ## 3. 知识点完整性与合并原则（最高优先级）
 
 ### 3.1 零无故删减（Zero Unjustified Deletion）
@@ -379,17 +423,20 @@ merge_target: null 或目标文件
 2. 确认本轮允许修改的文件范围，并记录其他文件状态。
 3. 读取 Inbox 文件的实际内容并按技术主题分类，不根据标题、来源机构或现有目录机械分组。
 4. 根据 2.3 节建立主题批次；小类可组合，同一主题超过 8 篇时优先完整纳入并记录豁免理由。
-5. 读取本批全部来源文件和现有候选稿，建立知识点清单（Knowledge Inventory），覆盖定义、参数、示例、边界、异常、版本和来源。
+5. 读取本批全部来源文件和现有候选稿；遇到 `.ipynb` 时同时读取全部单元格、已保存输出和内核元数据；建立知识点清单（Knowledge Inventory），覆盖定义、参数、示例、边界、异常、版本和来源。
 6. 按主题设计正式章节结构，将相似内容深度合并到同一章节。
 7. 仅删除经确认 100% 重叠的内容，并保留信息最完整的表达。
 8. 纠正明确错误；涉及版本变化时核对官方文档并保留版本说明。
 9. 统一专业名词、标题层级、列表、加粗、行内代码和 Output 格式。
 10. 将候选稿写入 `Processing/01-Review/`，等待用户明确批准；不得提前移动 Inbox 原稿。
-11. 用户批准后，先移除正文中的 Review 专用说明和行政信息，再写入或合并到 `Notes/`；验证成功后把本批 Inbox 原稿归档至 `Processing/02-Processed/<日期-批次名称>/`。
-12. 每次正式写入 Notes 后，立即根据 Notes 的真实目录树更新根目录 `README.md`，并验证所有目录链接。
-13. Processed 超过 3 个已完成批次时，按安全规则清理最旧批次。
-14. 写入目标文件后执行完整性、Markdown、代码、链接、生命周期和修改范围自检。
-15. 向用户报告修改文件、来源、合并方式、纠错内容、不确定事项和验证结果。
+11. 用户批准后，先移除正文中的 Review 专用说明和行政信息，再写入或合并到 `Notes/`；课程与作业资料可单独进入本地 Notes，但必须保持 Git 忽略。
+12. 笔记跨目录移动或生成正式副本时，读取 Attachment Management 当前配置，同步附件到新笔记路径，更新并验证全部引用；未经用户批准不得删除图片。
+13. Notes 与附件验证成功后，把本批 Inbox 原稿及其恢复所需附件归档至 `Processing/02-Processed/<日期-批次名称>/`。
+14. 每次正式写入 Notes 后，根据可公开知识笔记的真实目录树更新根目录 `README.md`，排除 Git 忽略的私人资料，并验证所有目录链接。
+15. Processed 超过 3 个已完成批次时，按安全规则清理最旧批次。
+16. 用户提出新的通用格式或工作流规则时，自动将其合并写入 `AGENTS.md`。
+17. 写入目标文件后执行完整性、Markdown、代码、链接、附件、隐私、生命周期和修改范围自检。
+18. 向用户报告修改文件、来源、合并方式、附件迁移、隐私处理、纠错内容、不确定事项和验证结果。
 
 ## 10. 强制自检清单（Mandatory Self-check）
 
@@ -408,7 +455,10 @@ merge_target: null 或目标文件
 - [ ] 纯定义或赋值示例没有“无控制台输出”的模板废话。
 - [ ] 外部副作用示例已说明副作用或输出依赖。
 - [ ] Python 代码块能够通过语法检查；伪代码和故意错误示例已明确标记。
+- [ ] `.ipynb` 来源的 Markdown、代码、输出、单元格依赖和内核版本均已检查；原 notebook 在审核通过前仍保留于 Inbox。
 - [ ] Wiki Link、YAML、代码围栏、公式和附件引用完整。
+- [ ] 笔记移动后，正式附件和 Processed 恢复附件均符合 Attachment Management 当前路径与命名规则，所有引用目标存在。
+- [ ] 没有未经用户明确批准就删除图片或其他视觉附件。
 - [ ] 只有用户授权的目标文件发生了修改。
 - [ ] 候选稿仍位于 Review，除非用户明确批准正式入库。
 - [ ] 正式入库时遵循了 Inbox → Review → 用户批准 → Notes + Processed 的顺序。
@@ -417,6 +467,8 @@ merge_target: null 或目标文件
 - [ ] 作业题、技术练习与参考答案已移入 `00-课程与作业指南/`，且主技术笔记只保留必要的独立知识示例。
 - [ ] 正式 Notes 正文不包含完整性/合并原则、来源原稿、合并方式、审核状态、建议目标或不确定事项等 Review 专用说明。
 - [ ] 本次 Notes 入库后已同步更新根目录 `README.md`；Notes 文件数、README 笔记链接数和实际可解析目标完全一致。
+- [ ] `/Processing/`、`/Attachments/Processing/`、`/.obsidian/` 与 `/Notes/**/00-课程与作业指南/` 已被 Git 忽略，README 未列出私人课程资料，Git 索引中没有应排除的隐私文件。
+- [ ] 用户本轮新增的通用格式、目录、附件或工作流要求已自动合并进 `AGENTS.md`。
 - [ ] `Processing/02-Processed/` 只保留最近 3 个已完成批次；任何旧批次清理都经过精确确认并优先采用可恢复方式。
 
 任何一项未通过，都不能宣称整理完成；必须修正或在“不确定事项（Open Questions）”中明确报告。
