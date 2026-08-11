@@ -48,6 +48,11 @@
     - **03-深度学习（Deep Learning）/**
       - **00-概览（Overview）/**
         - [01-深度学习概览（Deep Learning Overview）](Notes/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6%EF%BC%88Data%20Science%EF%BC%89/03-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%EF%BC%88Deep%20Learning%EF%BC%89/00-%E6%A6%82%E8%A7%88%EF%BC%88Overview%EF%BC%89/01-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A6%82%E8%A7%88%EF%BC%88Deep%20Learning%20Overview%EF%BC%89.md)
+      - **02-模型开发（Model Development）/**
+        - **02-框架与工具（Frameworks and Tools）/**
+          - [01-PyTorch 张量基础（PyTorch Tensor Fundamentals）](Notes/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6%EF%BC%88Data%20Science%EF%BC%89/03-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%EF%BC%88Deep%20Learning%EF%BC%89/02-%E6%A8%A1%E5%9E%8B%E5%BC%80%E5%8F%91%EF%BC%88Model%20Development%EF%BC%89/02-%E6%A1%86%E6%9E%B6%E4%B8%8E%E5%B7%A5%E5%85%B7%EF%BC%88Frameworks%20and%20Tools%EF%BC%89/01-PyTorch%20%E5%BC%A0%E9%87%8F%E5%9F%BA%E7%A1%80%EF%BC%88PyTorch%20Tensor%20Fundamentals%EF%BC%89.md)
+          - [02-PyTorch 自动微分与神经网络组件（PyTorch Autograd and Neural Network Components）](Notes/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6%EF%BC%88Data%20Science%EF%BC%89/03-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%EF%BC%88Deep%20Learning%EF%BC%89/02-%E6%A8%A1%E5%9E%8B%E5%BC%80%E5%8F%91%EF%BC%88Model%20Development%EF%BC%89/02-%E6%A1%86%E6%9E%B6%E4%B8%8E%E5%B7%A5%E5%85%B7%EF%BC%88Frameworks%20and%20Tools%EF%BC%89/02-PyTorch%20%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86%E4%B8%8E%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%BB%84%E4%BB%B6%EF%BC%88PyTorch%20Autograd%20and%20Neural%20Network%20Components%EF%BC%89.md)
+          - [03-PyTorch 线性回归实战（PyTorch Linear Regression）](Notes/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6%EF%BC%88Data%20Science%EF%BC%89/03-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%EF%BC%88Deep%20Learning%EF%BC%89/02-%E6%A8%A1%E5%9E%8B%E5%BC%80%E5%8F%91%EF%BC%88Model%20Development%EF%BC%89/02-%E6%A1%86%E6%9E%B6%E4%B8%8E%E5%B7%A5%E5%85%B7%EF%BC%88Frameworks%20and%20Tools%EF%BC%89/03-PyTorch%20%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E5%AE%9E%E6%88%98%EF%BC%88PyTorch%20Linear%20Regression%EF%BC%89.md)
 <!-- notes-index:end -->
 
 ## 笔记处理流程 (Note Processing Workflow)
