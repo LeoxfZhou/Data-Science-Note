@@ -7,7 +7,7 @@ tags:
   - data-science/deep-learning/pytorch
 status: published
 created: 2026-08-11
-published_at: 2026-08-11
+published_at: 2026-08-12
 ---
 # 神经网络激活函数（Neural Network Activation Functions）
 ## 1. 为什么需要激活函数（Why Activation Functions Are Needed）
@@ -15,9 +15,6 @@ published_at: 2026-08-11
 - 多个没有非线性激活的仿射层复合后仍是一个仿射变换，深度无法增加函数类别的表达能力。
 - 激活函数（Activation Function）逐元素引入非线性，使网络能够逼近复杂决策边界。
 - 标准逐元素激活通常保持张量形状不变，并对每个位置独立计算；这条性质不自动适用于 GLU、Maxout 等会切分或聚合通道的特殊激活结构。
-
-> [!tip] 大白话理解（Plain-language Intuition）
-> 激活函数给线性变换加入“拐弯能力”。如果没有激活函数，不管堆多少层，整体仍等价于一次线性变换；如果激活函数长期处在几乎不变化的饱和区，梯度就像被关小的水龙头，越往前传越弱。
 ## 2. 选择维度（Selection Criteria）
 
 |维度（Criterion）|需要关注的问题|
@@ -130,7 +127,7 @@ print(torch.equal(module_result, functional_result))  # 输出: True
 ## 9. MobileNet 中的激活设计（Activation Design in MobileNet）
 ### 9.1 MobileNet V1
 - 深度可分离卷积（Depthwise Separable Convolution）通常由深度卷积（Depthwise Convolution）和逐点卷积（Pointwise Convolution）组成。
-- MobileNet V1 的典型模块结构为 `Depthwise Conv → BatchNorm → ReLU → Pointwise Conv → BatchNorm → ReLU`。
+- 来源结构为 `Depthwise Conv → BatchNorm → ReLU → Pointwise Conv → BatchNorm → ReLU`。
 ### 9.2 MobileNet V2 线性瓶颈（Linear Bottleneck）
 - MobileNet V2 的倒残差（Inverted Residual）在低维瓶颈输出处采用线性映射，而不是再用 ReLU 截断。
 - 低维特征空间容量有限，ReLU 把负值置零可能不可逆地破坏信息；线性瓶颈用于尽量保存投影后的特征。
@@ -150,6 +147,60 @@ print(torch.equal(module_result, functional_result))  # 输出: True
 - Tanh/Sigmoid 常与 Xavier 初始化搭配，并根据激活选择增益（Gain）。
 - ReLU/LeakyReLU 常与 Kaiming 初始化搭配，`nonlinearity` 与负斜率配置必须一致。
 - 详见 [[01-神经网络参数初始化与梯度流（Neural Network Initialization and Gradient Flow）]]。
+## 12. 饱和区间与输出层边界（Saturation Regions and Output-layer Boundaries）
+### 12.1 Sigmoid 数值直觉（Sigmoid Numerical Intuition）
+- Sigmoid 输出范围为 $(0,1)$，导数最大值为 $0.25$；当输入绝对值增大时，输出趋近 0 或 1，导数趋近 0。
+- 对 Sigmoid 而言，约 $[-6,6]$ 可作为“输出仍可观察到差异”的直觉区间，约 $[-3,3]$ 是变化更明显的区域；它们不是数学截断点，也不能推出“网络超过 5 层必然梯度消失”。
+- 隐藏层长期使用 Sigmoid 还会受到非零中心和饱和影响；二分类输出应优先把原始 Logit 交给 `BCEWithLogitsLoss`，推理展示概率时再做 Sigmoid。
+### 12.2 Tanh 数值直觉（Tanh Numerical Intuition）
+- Tanh 输出范围为 $(-1,1)$，导数最大值为 1；输入绝对值较大时同样饱和。
+- Tanh 在约 $[-3,3]$ 内变化较明显。Tanh 的零中心输出通常比 Sigmoid 更利于优化，但不能消除深层梯度消失。
+### 12.3 ReLU 边界（ReLU Boundaries）
+- ReLU 正半轴导数为 1，能缓解饱和型激活的梯度消失；负半轴导数为 0，可能产生死 ReLU。
+- 稀疏激活可能有益，但“输出更多 0”不等于自动防止过拟合；泛化效果必须验证。
+- 绘图时图例与标题必须和实际函数一致，例如 ReLU 曲线应标记为 `ReLU`。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 激活函数给线性变换加入“拐弯能力”。如果没有激活函数，不管堆多少层，整体仍等价于一次线性变换；如果激活函数长期处在几乎不变化的饱和区，梯度就像被关小的水龙头，越往前传越弱。
+### 12.4 Softmax 与任务输出（Softmax and Task Outputs）
+$$
+p_i=\frac{e^{z_i}}{\sum_j e^{z_j}},\qquad \sum_i p_i=1
+$$
+- Softmax 适用于互斥多分类概率展示；训练时 `CrossEntropyLoss` 直接接收未归一化 Logits。
+- 二分类/多标签常使用独立 Sigmoid；回归常用恒等映射（Identity），但有界回归可按目标范围选择受限输出。
+```python
+import torch
+
+scores = torch.tensor([0.2, 0.02, 0.15, 0.15, 1.3, 0.5, 0.06, 1.1, 0.05, 3.75])
+probabilities = torch.softmax(scores, dim=0)
+print(round(probabilities.sum().item(), 6))  # 1.0
+print(probabilities.argmax().item())         # 9
+```
+## 13. 绘制激活与导数（Plotting Activations and Derivatives）
+```python
+import matplotlib.pyplot as plt
+import torch
+
+x = torch.linspace(-10, 10, 1000, requires_grad=True)
+functions = {
+    "Sigmoid": torch.sigmoid,
+    "Tanh": torch.tanh,
+    "ReLU": torch.relu,
+}
+
+figure, axes = plt.subplots(len(functions), 2, figsize=(10, 9))
+for row, (name, function) in enumerate(functions.items()):
+    # 每个函数重新前向并求和，得到所有采样点的一阶导数。
+    y = function(x)
+    gradient = torch.autograd.grad(y.sum(), x, retain_graph=True)[0]
+    axes[row, 0].plot(x.detach(), y.detach())
+    axes[row, 0].set_title(name)
+    axes[row, 1].plot(x.detach(), gradient.detach())
+    axes[row, 1].set_title(f"{name} derivative")
+plt.tight_layout()
+plt.show()
+```
+- 该示例产生图形窗口，没有固定控制台输出；图像形状才是观察对象。
 ## 参考资料（References）
 - [`torch.nn` 激活模块官方文档](https://docs.pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity)
 - [MobileNetV2 原论文](https://arxiv.org/abs/1801.04381)

@@ -7,7 +7,7 @@ tags:
   - data-science/deep-learning/optimization
 status: published
 created: 2026-08-11
-published_at: 2026-08-11
+published_at: 2026-08-12
 ---
 # 神经网络参数初始化与梯度流（Neural Network Initialization and Gradient Flow）
 ## 1. 初始化目标（Initialization Objectives）
@@ -58,9 +58,6 @@ $$
 - 适合线性、Tanh 和一些近似对称激活；应通过 `nn.init.calculate_gain()` 选择增益。
 - 深层 ReLU 会把负半轴置零，Xavier 的理想方差假设不再匹配，常改用 Kaiming。
 - 在零均值对称输入的简化假设下，$\operatorname{Var}(\operatorname{ReLU}(x))\approx\frac12\operatorname{Var}(x)$，连续 $L$ 层可能产生近似 $0.5^L$ 的方差衰减；真实网络还受均值偏移、权重、归一化和残差连接影响。
-
-> [!tip] 大白话理解（Plain-language Intuition）
-> 初始化是在训练开始前决定每条连接的“起跑位置”。全是相同值会让多个神经元学成同一个样子；数值太大会让信号和梯度爆掉，太小又会让它们逐层消失。Xavier 和 Kaiming 的核心目标，就是让信号经过多层后仍保持在可学习的量级。
 ## 6. Kaiming（He）初始化
 ### 6.1 ReLU 正态形式（Normal Form for ReLU）
 $$
@@ -151,8 +148,64 @@ print(network.output.bias.sum().item())  # 输出: 0.0
 - 把零偏置与零权重混为一谈。
 - 认为初始化能单独消除所有梯度问题，忽略学习率、归一化、残差和数据尺度。
 - 把公式中的方差误写为标准差；API 参数通常基于推导后的 bound/std。
+## 12. 初始化方法与教学示例（Initialization Methods and Teaching Example）
+### 12.1 随机与常数初始化（Random and Constant Initialization）
+- `uniform_()` 可在指定区间均匀采样，`normal_()` 可按指定均值和标准差高斯采样；默认参数不应被误记为适合所有网络的理论选择。
+- 全零、全一或任意相同常数的同层权重不能打破神经元对称性。全零偏置通常没有这个问题，因为随机权重已经打破对称性。
+- 全一或较大常数权重还可能让激活与梯度逐层膨胀；常数初始化主要用于调试、掩码或确有理论要求的局部参数。
+### 12.2 API 对照（API Comparison）
+```python
+import torch
+from torch import nn
+
+torch.manual_seed(0)
+layer = nn.Linear(5, 3)
+nn.init.uniform_(layer.weight, a=-0.1, b=0.1)
+nn.init.zeros_(layer.bias)
+print(layer.weight.shape)  # torch.Size([3, 5])
+print(layer.bias.tolist()) # [0.0, 0.0, 0.0]
+
+nn.init.ones_(layer.weight)
+print(layer.weight.sum().item())  # 15.0
+nn.init.constant_(layer.weight, 5.0)
+print(layer.weight[0, 0].item())  # 5.0
+```
+### 12.3 混合激活网络（Mixed-activation Network）
+```python
+import torch
+from torch import nn
+
+
+class TeachingMLP(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.linear1 = nn.Linear(3, 3)
+        self.linear2 = nn.Linear(3, 2)
+        self.output = nn.Linear(2, 2)
+        # 第一层后接 Sigmoid，使用 Xavier 作为教学搭配。
+        nn.init.xavier_normal_(self.linear1.weight)
+        nn.init.zeros_(self.linear1.bias)
+        # 第二层后接 ReLU，Kaiming 的 nonlinearity 必须匹配实际激活。
+        nn.init.kaiming_normal_(self.linear2.weight, nonlinearity="relu")
+        nn.init.zeros_(self.linear2.bias)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = torch.sigmoid(self.linear1(x))
+        x = torch.relu(self.linear2(x))
+        return self.output(x)  # 训练 CE 时返回 Logits，不先做 Softmax。
+
+
+model = TeachingMLP()
+result = model(torch.randn(5, 3))
+print(result.shape)  # torch.Size([5, 2])
+print(sum(parameter.numel() for parameter in model.parameters()))  # 26
+```
+- 若后续使用 `CrossEntropyLoss`，模型内部必须输出未经 Softmax 的 logits，避免重复归一化并保留数值稳定性。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> 初始化是在训练开始前决定每条连接的“起跑位置”。全是相同值会让多个神经元学成同一个样子；数值太大会让信号和梯度爆掉，太小又会让它们逐层消失。Xavier 和 Kaiming 的核心目标，就是让信号经过多层后仍保持在可学习的量级。
 ## 参考资料（References）
 - [`torch.nn.init` 官方文档](https://docs.pytorch.org/docs/stable/nn.init.html)
 - [Understanding the Difficulty of Training Deep Feedforward Neural Networks](https://proceedings.mlr.press/v9/glorot10a.html)
 - [Delving Deep into Rectifiers](https://arxiv.org/abs/1502.01852)
-- [Kaiming 与 Xavier 初始化对比视频](https://www.youtube.com/watch?v=r_GYQvnfP3M)
+- [来源补充视频：Kaiming vs. Xavier](https://www.youtube.com/watch?v=r_GYQvnfP3M)

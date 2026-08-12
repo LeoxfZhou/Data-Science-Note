@@ -1,0 +1,17 @@
+services:
+  detector_url: http://127.0.0.1:9001
+  recognizer_url: http://127.0.0.1:9002
+  request_timeout_seconds: 10.0
+orchestrator:
+  allowlist: ["TEST001", "沪ARZ007"]
+  minimum_plate_confidence: 0.75
+hardware:
+  enabled: false
+  driver: mock  # 可选值：mock、mqtt、serial
+  mqtt:
+    host: 127.0.0.1
+    port: 1883
+    topic: smartgate/command
+  serial:
+    port: /dev/ttyUSB0
+    baudrate: 9600

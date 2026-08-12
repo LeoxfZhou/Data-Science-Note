@@ -1,0 +1,16 @@
+detector:
+  weights: weights/plate_detector.pt
+  device: null  # null 表示让推理框架自动选择；生产环境应显式确认。
+  image_size: 640
+  confidence_threshold: 0.25
+  iou_threshold: 0.45
+ocr:
+  weights: weights/plate_ocr.onnx
+  device: cpu
+  image_height: 48
+  image_width: 168
+training:
+  epochs: 100
+  batch_size: 16
+  learning_rate: 0.001
+  seed: 42

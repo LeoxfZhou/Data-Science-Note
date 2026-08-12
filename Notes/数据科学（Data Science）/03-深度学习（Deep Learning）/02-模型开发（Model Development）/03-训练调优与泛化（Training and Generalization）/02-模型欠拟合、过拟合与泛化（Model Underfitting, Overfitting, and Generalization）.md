@@ -8,7 +8,7 @@ tags:
   - data-science/model-training
 status: published
 created: 2026-08-11
-published_at: 2026-08-11
+published_at: 2026-08-12
 ---
 # 模型欠拟合、过拟合与泛化（Model Underfitting, Overfitting, and Generalization）
 ## 1. 泛化诊断（Generalization Diagnosis）
@@ -21,9 +21,6 @@ published_at: 2026-08-11
 
 - 测试集应只用于最终无偏评估；日常诊断使用验证集。
 - “训练误差高/低”必须相对于任务基线、数据噪声和可达到上限判断。
-
-> [!tip] 大白话理解（Plain-language Intuition）
-> 欠拟合像学生连课本例题都不会，说明能力或训练不足；过拟合像学生只背熟了练习册答案，换一道题就不会。泛化就是既能学会训练数据里的规律，又没有把偶然噪声当成规律记住。
 ## 2. 欠拟合原因与对策（Underfitting Causes and Remedies）
 ### 2.1 模型容量不足（Insufficient Model Capacity）
 - 网络层数、宽度、通道数或特征交互不足，假设空间无法表达目标规律。
@@ -103,11 +100,6 @@ print(training_output.shape)       # 输出: torch.Size([1000])
 - 小 batch 的统计不稳定时可考虑 GroupNorm（Group Normalization, GN）或 LayerNorm（Layer Normalization, LN）。
 - 序列模型常用 LayerNorm；风格迁移常见 InstanceNorm（Instance Normalization, IN）；具体选择取决于张量轴和任务。
 - BatchNorm 与 Dropout 的机制、训练/推理状态和适用条件不同，二者不能互相替代。
-- **原论文动机**：BatchNorm 通过规范化小批次内的中间激活，试图减少内部协变量偏移（Internal Covariate Shift），从而稳定训练。
-- **后续演化/现代理解**：后续研究还从优化地形平滑、重参数化、尺度稳定、梯度传播和正则化效应等角度解释 BatchNorm；其训练收益通常由多种机制共同形成。
-
-> [!tip] 大白话理解（Plain-language Intuition）
-> BatchNorm 在训练时先用当前小批次估计均值和方差，再用可学习参数重新缩放；同时把统计量逐步记录下来。推理时不能再依赖“当前这一批碰巧有哪些样本”，因此改用训练期间保存的运行统计。忘记切换 `eval()`，同一个样本就可能因为和不同样本凑成一批而得到不同结果。
 ## 9. CNN 完整工作流（Complete CNN Workflow）
 ```text
 数据输入
@@ -142,6 +134,58 @@ print(training_output.shape)       # 输出: torch.Size([1000])
 - 同时绘制训练/验证损失和主要指标，不能只看一个最终数字。
 - 报告多次运行均值与波动，避免把单次随机优势当成结论。
 - 保留最简单基线，确认复杂策略带来可重复增益。
+## 12. Dropout 实践细节（Dropout Practice Details）
+- 训练时 `p` 表示丢弃概率；保留元素乘 $1/(1-p)$，使期望输出与评估时一致。
+- $p=0.2$–$0.5$ 是常见实验起点：小模型可尝试 $0.3$ 或更低，较深全连接层可尝试 $0.5$ 左右；这不是按模型深度自动选择的规则，`p=0.6` 可能造成欠拟合。
+- 常见位置是隐藏层激活之后；卷积、残差、注意力和输出层有各自更细的 Dropout 设计。
+```python
+import torch
+from torch import nn
+
+torch.manual_seed(0)
+dropout = nn.Dropout(p=0.4)
+x = torch.ones(10000)
+dropout.train()
+training = dropout(x)
+dropout.eval()
+evaluation = dropout(x)
+print(round(training.mean().item(), 2))  # 接近 1.0
+print(evaluation.equal(x))               # True
+```
+## 13. BatchNorm 数学与状态（BatchNorm Mathematics and State）
+对 mini-batch 中指定通道/特征：
+$$
+\hat x=\frac{x-\mu_B}{\sqrt{\sigma_B^2+\epsilon}},\qquad y=\gamma\hat x+\beta
+$$
+- $\epsilon$ 防止除零，常见默认值为 $10^{-5}$；$\gamma$ 与 $\beta$ 是可学习缩放和平移参数。
+- `BatchNorm1d` 常处理 `(N,C)` 或 `(N,C,L)`；`BatchNorm2d` 处理 `(N,C,H,W)`；`BatchNorm3d` 处理 `(N,C,D,H,W)`。
+- 训练模式使用当前 batch 统计并通常更新运行均值/方差；评估模式默认使用运行统计。`model.eval()` 不关闭梯度。
+- **原论文动机**：BatchNorm 通过规范化小批次内的中间激活，试图减少内部协变量偏移（Internal Covariate Shift），从而稳定训练。
+- **后续演化/现代理解**：后续研究还从优化地形平滑、重参数化、尺度稳定、梯度传播和正则化效应等角度解释 BatchNorm；其训练收益通常由多种机制共同形成。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> Dropout 像训练时随机让一部分成员暂时休息，迫使网络不能只依赖某几个神经元；BatchNorm 则像持续把每层收到的数据调回较稳定的尺度，再允许模型用可学习参数调整。前者主要制造随机扰动，后者主要改变激活的统计与优化条件，所以不能互换。
+- BatchNorm 的首要价值是优化与尺度稳定；mini-batch 随机性可能带来正则化效应，但不能保证替代 Dropout。
+### 13.1 轴与边界（Axes and Boundaries）
+- `BatchNorm2d` 对每个通道聚合 $N,H,W$ 轴；单张图仍可能有多个空间元素，因此不等于统计样本数必为 1。
+- `BatchNorm1d` 的 `(1,C)` 训练输入没有足够的每通道元素，通常报错；这与 `(1,C,L)` 且 $L>1$ 不同。
+- 小 batch、分布式训练和域偏移会让统计不稳定，可评估 SyncBatchNorm、GroupNorm 或 LayerNorm。
+```python
+import torch
+from torch import nn
+
+batch_norm = nn.BatchNorm2d(num_features=2)
+x = torch.randn(1, 2, 3, 4)
+y = batch_norm(x)
+print(y.shape)                    # torch.Size([1, 2, 3, 4])
+print(batch_norm.weight.tolist()) # [1.0, 1.0]
+print(batch_norm.bias.tolist())   # [0.0, 0.0]
+```
+## 14. 调优顺序（Tuning Order）
+1. 先验证数据划分、目标编码、输入尺度、损失与评估实现。
+2. 建立简单模型、SGD 或 Adam 基线，绘制训练与验证曲线。
+3. 根据欠拟合/过拟合证据调整容量、优化器、学习率、调度、归一化、权重衰减和 Dropout。
+4. 每次改变少量变量并记录随机种子；不能仅凭单次准确率判断“增加深度”或“换 Adam”有效。
 ## 参考资料（References）
 - [`torch.nn.Dropout` 官方文档](https://docs.pytorch.org/docs/stable/generated/torch.nn.Dropout.html)
 - [PyTorch 正则化与优化基础教程](https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html)
