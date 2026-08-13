@@ -1,14 +1,12 @@
 ---
-title: "自然语言处理任务、演进与工业架构（NLP Tasks, Evolution, and Industrial Architectures）"
+title: "自然语言处理任务、发展与应用（NLP Tasks, History, and Applications）"
 tags:
-  - data-science/nlp/overview
+  - data-science/nlp
 status: published
-created: 2026-08-12
-published_at: 2026-08-12
+created: 2026-08-13
+published_at: 2026-08-13
 ---
-# 自然语言处理任务、演进与工业架构（NLP Tasks, Evolution, and Industrial Architectures）
-主链接(夸克网盘)：https://pan.quark.cn/s/57a3c9d4d0b1  提取码：5eDc
-备份链接(123云盘)：https://1852590080.share.123pan.cn/123pan/kBfwvd-RqorA?pwd=pw7h#
+# 自然语言处理任务、发展与应用（NLP Tasks, History, and Applications）
 
 ##  NLP 项目课程与技术概述·深度学习笔记
 ### 一、 课程目标与技能树规划
@@ -72,6 +70,8 @@ NLP 的发展经历了从“人工写规则”到“机器自我学习”，再�
     - **GAN**：探索文本生成的对抗学习。
 
 #### 阶段 4：Transformer 变革时代 (2017)
+> [!tip] 大白话理解（Plain-language Intuition）
+> Transformer 把序列建模的主要工作交给注意力和逐位置前馈网络。训练时整段序列可用矩阵并行计算；自回归生成时仍必须逐 token 产生，因此训练并行不等于推理也完全并行。
 
 - **里程碑**：Google 提出 **Transformer** 架构（引入 Self-Attention 自注意力机制），彻底解决了 RNN 无法并行训练的痛点，奠定了现代大模型的基础。
 
@@ -138,3 +138,47 @@ NLP 的发展经历了从“人工写规则”到“机器自我学习”，再�
     - 第一层将这些直线在空间中组合成多边形。
     - 第二层及后续输出层通过**激活函数的非线性映射**与**权重叠加**，将多边形平滑为包围内圈蓝色数据的**环形非线性决策边界**（如输出图中的蓝色圆形区域）。
 3. **损失变化**：随着训练进行，测试损失（Test Loss）与训练损失（Training Loss）迅速下降并收敛，表明多层神经网络具有极强的非线性拟合和特征组合能力。
+
+### 1 什么是自然语言处理
+
+- 自然语言处理（Natural Language Processing, 简称NLP）是计算机科学与语言学中关注于计算机与人类语言间转换的领域.
+
+---
+
+### 2 自然语言处理的发展简史
+
+![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/04-自然语言处理（Natural Language Processing）/00-概览（Overview）/01-自然语言处理概览（NLP Overview）/01-自然语言处理概览（NLP Overview）-20260813120000001.png]]
+
+![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/04-自然语言处理（Natural Language Processing）/00-概览（Overview）/01-自然语言处理概览（NLP Overview）/01-自然语言处理概览（NLP Overview）-20260813120000002.png]]
+
+![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/04-自然语言处理（Natural Language Processing）/00-概览（Overview）/01-自然语言处理概览（NLP Overview）/01-自然语言处理概览（NLP Overview）-20260813120000003.png]]
+
+![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/04-自然语言处理（Natural Language Processing）/00-概览（Overview）/01-自然语言处理概览（NLP Overview）/01-自然语言处理概览（NLP Overview）-20260813120000004.png]]
+
+![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/04-自然语言处理（Natural Language Processing）/00-概览（Overview）/01-自然语言处理概览（NLP Overview）/01-自然语言处理概览（NLP Overview）-20260813120000005.png]]
+
+---
+
+### 3 自然语言处理的应用场景
+
+- 语音助手
+- 机器翻译
+- 搜索引擎
+- 智能问答
+- ...
+
+---
+
+#### 3.1 语音助手
+
+- 科大讯飞语音识别技术访谈!
+- 前1分钟，6分45秒 雄安新区城市未来身份认证系统 活体检测
+
+---
+
+#### 3.2 机器翻译
+
+- CCTV上的机器翻译系统, 让世界聊得来!
+- 4分50秒 机器翻译软件的威力
+
+---

@@ -31,15 +31,10 @@ Processing/
 3. **待审核（Review）**：将整理后的完整候选稿写入 `Processing/01-Review/`，保留来源路径、建议目标位置、建议新建或合并、合并对象和不确定事项。
 4. **人工检查（Human Review）**：等待用户检查格式与内容。未经用户明确说“通过”“批准入库”或给出同等含义的指令，不得进入下一阶段。
 5. **正式入库（Acceptance）**：用户批准后，将候选稿新建、替换或深度合并到 `Notes/` 中的正式目标笔记。
-6. **原稿归档（Processed Backup）**：只有在 Notes 写入成功并完成链接、内容和文件校验后，才把本次已经吸收的 Inbox 原稿移动到 `Processing/02-Processed/<日期-批次名称>/`。
-7. **清理 Review（Review Cleanup）**：确认 Notes 与 Processed 均正确后，删除或移走已经完成入库的 Review 候选稿；尚未批准或仍有争议的候选稿继续留在 Review。
+6. **原稿清理（Source Cleanup）**：只有在 Notes 写入、附件迁移、链接校验和 README 同步全部成功后，才可删除本次已经吸收的 Inbox 原稿。删除范围必须精确限定为已通过审核且已成功入库的批次；未通过、未吸收或校验失败的原稿继续保留。
+7. **清理 Review（Review Cleanup）**：确认 Notes、附件、README 与 Inbox 清理均正确后，删除或移走已经完成入库的 Review 候选稿；尚未批准或仍有争议的候选稿继续留在 Review。
 
-`Processing/02-Processed/` 的保留规则：
-- 只保留最近 **3 次已经完成正式入库的处理批次**，不是任意 3 个单独文件。
-- 同一批次吸收了多个 Inbox 原稿时，这些原稿必须放在同一个带日期和批次名称的子目录中，并整体计为一次。
-- 每次完成第 4 个新批次后，先按批次日期确认新旧顺序，再清理最旧的已完成批次，使目录恢复为最近 3 次。
-- 清理旧批次属于破坏性操作（Destructive Action）：必须先确认目标 Notes 已成功写入、当前 3 个较新批次可恢复，并精确列出待清理目录；优先使用可恢复的废纸篓（Trash）而不是永久删除。
-- Review 未通过、Notes 写入失败、链接校验失败或归档不完整时，不得移动 Inbox 原稿，也不得计入最近 3 次。
+`Processing/02-Processed/` 作为旧流程遗留目录保留，不再接收新的原稿备份；不得把它作为删除 Inbox 前置条件。现有历史批次未经用户单独授权不得清理或改动。
 
 标准流程可简写为：
 ```text
@@ -47,9 +42,9 @@ Processing/
     ↓ Codex 整理
 01-Review 候选稿
     ↓ 用户检查并明确批准
-Notes 正式笔记 + 02-Processed 原稿备份
-    ↓ 仅保留最近 3 个已完成批次
-清理最旧的 Processed 批次
+Notes 正式笔记 + 正式附件 + README 同步
+    ↓ 全部校验成功
+删除本批已吸收的 Inbox 原稿并清理已完成 Review
 ```
 
 ### 2.2 修改范围与安全要求（Mutation Scope and Safety）
@@ -57,8 +52,8 @@ Notes 正式笔记 + 02-Processed 原稿备份
 - 开始前必须确认本轮允许修改的文件和目录。
 - 只修改用户明确指定的目标笔记，不顺带修改其他笔记、Inbox 原稿、Notes、Attachments 或 `.obsidian/`。
 - 新整理或重构的候选笔记默认写入 `Processing/01-Review/`，并遵循 2.1 节的完整生命周期。
-- 只有用户明确审核通过后，才可以将候选笔记并入 `Notes/` 并归档 Inbox 原稿。
-- Review 完成前必须保留 Inbox 原稿；正式入库后在 `Processing/02-Processed/` 保留最近 3 次已完成批次的原稿。
+- 只有用户明确审核通过后，才可以将候选笔记并入 `Notes/`；在正式笔记、附件和 README 全部校验成功后，才可以删除本批已吸收的 Inbox 原稿。
+- Review 完成前必须保留 Inbox 原稿；正式入库失败、附件引用断裂或 README 校验失败时同样不得删除原稿。
 - 不得擅自删除、移动或覆盖来源文件。
 - 移动笔记或附件时必须保留 Wiki Link、Markdown Link 和附件引用的可解析性。
 
@@ -108,16 +103,16 @@ README 目录规则如下：
 
 ### 2.6 附件迁移与 Attachment Management 同步（Attachment Migration and Attachment Management Synchronization）
 
-笔记在 Inbox、Review、Notes 和 Processed 之间移动或生成正式副本时，必须先读取 `.obsidian/plugins/attachment-management/data.json` 中的当前设置，并按照插件的真实根目录、附件路径模板、文件名模板和自动重命名选项处理附件；不得假设配置长期不变。
+笔记在 Inbox、Review 和 Notes 之间移动或生成正式副本时，必须先读取 `.obsidian/plugins/attachment-management/data.json` 中的当前设置，并按照插件的真实根目录、附件路径模板、文件名模板和自动重命名选项处理附件；不得假设配置长期不变。
 
 附件处理规则如下：
 1. **路径同步（Path Synchronization）**：笔记正式写入 `Notes/` 时，知识正文使用的附件必须同步复制或移动到 Attachment Management 为正式笔记计算出的目标目录，并更新正文中的 Wiki Link 或 Markdown Link；不得让正式笔记长期引用 `Attachments/Processing/00-Inbox/...`。
-2. **正式副本与原稿恢复（Published Copy and Original Recovery）**：如果 Inbox 原稿也需要归档到 Processed，正式 Notes 使用独立的附件副本；原始附件则随原稿进入对应 Processed 附件路径，确保正式笔记不会因最近三批清理而丢图，Processed 原稿仍具备恢复能力。
+2. **正式附件独立性（Published Attachment Independence）**：正式 Notes 必须使用位于正式 Attachment Management 目标目录中的独立附件；在删除 Inbox 原稿及其原始附件前，必须逐个验证正式引用存在且可解析，避免删除来源后造成丢图。
 3. **命名规则（Naming Rule）**：附件重命名必须遵循插件当前 `attachFormat` 和 `dateFormat`；能够从旧文件名可靠保留原时间标识时，应保留时间部分，只替换与新笔记不一致的笔记名前缀。
 4. **引用更新（Reference Update）**：附件路径或文件名改变后，必须更新所有受影响笔记中的 `![[...]]`、`[[...]]` 和 Markdown 图片链接，并逐个验证目标存在。不能只移动文件而不修改引用。
 5. **图片优先保留（Image Preservation First）**：图片、图表、截图和其他视觉附件默认保留，即使正文能够用文字概括，也不得擅自视为冗余附件删除。
 6. **删除需审核（Deletion Requires Review）**：任何图片附件如需删除，必须先在 Review 批次说明中列出文件、引用位置、删除理由和替代信息，并获得用户明确同意；未批准时继续保留。
-7. **孤立附件检查（Orphan Check）**：完成迁移后检查旧路径、正式路径和 Processed 路径，确认没有引用断裂、误覆盖或因同名文件导致的错误解析。发现无法确定归属的附件时移入 Review 判断，不直接删除。
+7. **孤立附件检查（Orphan Check）**：完成迁移后检查旧路径和正式路径，确认没有引用断裂、误覆盖或因同名文件导致的错误解析。发现无法确定归属的附件时移入 Review 判断，不直接删除。
 8. **插件能力边界（Plugin Capability Boundary）**：如果当前执行环境不能直接调用 Obsidian 插件命令，可以按插件配置执行等价的文件操作与引用更新；不得因此跳过路径同步或修改 `.obsidian/` 配置。
 
 ### 2.7 GitHub 隐私与公开范围（GitHub Privacy and Publication Scope）
@@ -142,7 +137,7 @@ Git 隐私规则如下：
 
 ### 2.9 Jupyter Notebook 转换（Jupyter Notebook Conversion）
 
-- `Processing/00-Inbox/` 中的 `.ipynb` 文件可以作为正式知识来源整理为 Markdown 候选笔记，但不得直接覆盖、删除或移动原 notebook；只有候选稿通过人工审核并正式入库后，原 notebook 才随同批原稿进入 `Processing/02-Processed/`。
+- `Processing/00-Inbox/` 中的 `.ipynb` 文件可以作为正式知识来源整理为 Markdown 候选笔记，但不得直接覆盖、删除或移动原 notebook；只有候选稿通过人工审核，正式笔记、输出附件和链接均验证成功后，原 notebook 才可随本批其他 Inbox 原稿一起删除。
 - 转换前必须逐个读取 Markdown 单元格（Markdown Cell）、代码单元格（Code Cell）、已保存输出（Saved Output）、执行顺序、内核与语言版本元数据；不能只提取代码而丢失解释、错误输出、警告或环境信息。
 - notebook 内容应按技术主题重构，不要求机械保持原单元格顺序；跨单元格依赖的变量、导入和随机状态必须在 Markdown 代码示例中补齐，使示例可以独立阅读和运行。
 - 原 notebook 的随机数值输出可改为固定随机种子后的可复现输出，或改为稳定的形状、类型和性质断言；此类调整只用于消除随机噪声，不得删去原示例所证明的知识点。
@@ -469,9 +464,9 @@ merge_target: null 或目标文件
 11. 将候选稿写入 `Processing/01-Review/`，等待用户明确批准；不得提前移动 Inbox 原稿。
 12. 用户批准后，先移除正文中的 Review 专用说明和行政信息，再写入或合并到 `Notes/`；课程与作业资料可单独进入本地 Notes，但必须保持 Git 忽略。
 13. 笔记跨目录移动或生成正式副本时，读取 Attachment Management 当前配置，同步附件到新笔记路径，更新并验证全部引用；未经用户批准不得删除图片。
-14. Notes 与附件验证成功后，把本批 Inbox 原稿及其恢复所需附件归档至 `Processing/02-Processed/<日期-批次名称>/`。
+14. Notes、附件引用和 README 验证成功后，精确删除本批已经吸收的 Inbox 原稿及其来源附件；不得删除其他主题或未入库原稿。
 15. 每次正式写入 Notes 后，根据可公开知识笔记的真实目录树更新根目录 `README.md`，排除 Git 忽略的私人资料，并验证所有目录链接。
-16. Processed 超过 3 个已完成批次时，按安全规则清理最旧批次。
+16. 清理已经完成入库的 Review 候选稿；`Processing/02-Processed/` 仅保留为旧流程遗留目录，不再写入新批次。
 17. 用户提出新的通用格式或工作流规则时，自动将其合并写入 `AGENTS.md`。
 18. 写入目标文件后执行完整性、Markdown、代码、链接、附件、隐私、生命周期和修改范围自检。
 19. 向用户报告修改文件、来源、合并方式、附件迁移、隐私处理、纠错内容、不确定事项和验证结果。
@@ -497,15 +492,15 @@ merge_target: null 或目标文件
 - [ ] 纯定义或赋值示例没有“无控制台输出”的模板废话。
 - [ ] 外部副作用示例已说明副作用或输出依赖。
 - [ ] Python 代码块能够通过语法检查；伪代码和故意错误示例已明确标记。
-- [ ] `.ipynb` 来源的 Markdown、代码、输出、单元格依赖和内核版本均已检查；原 notebook 在审核通过前仍保留于 Inbox。
+- [ ] `.ipynb` 来源的 Markdown、代码、输出、单元格依赖和内核版本均已检查；正式笔记与输出附件校验成功前，原 notebook 仍保留于 Inbox。
 - [ ] 项目模板包含可直接起步的最小项目、明确替换点和运行命令；可选功能与参数已说明功能、默认行为、适用场景和风险。
 - [ ] 项目模板已区分“实际运行验证”与“静态检查”，没有把未经执行的代码声称为已验证可用。
 - [ ] Wiki Link、YAML、代码围栏、公式和附件引用完整。
-- [ ] 笔记移动后，正式附件和 Processed 恢复附件均符合 Attachment Management 当前路径与命名规则，所有引用目标存在。
+- [ ] 笔记移动后，正式附件符合 Attachment Management 当前路径与命名规则，所有引用目标存在；删除来源附件前已完成逐项验证。
 - [ ] 没有未经用户明确批准就删除图片或其他视觉附件。
 - [ ] 只有用户授权的目标文件发生了修改。
 - [ ] 候选稿仍位于 Review，除非用户明确批准正式入库。
-- [ ] 正式入库时遵循了 Inbox → Review → 用户批准 → Notes + Processed 的顺序。
+- [ ] 正式入库时遵循了 Inbox → Review → 用户批准 → Notes/附件/README 校验 → 删除本批已吸收 Inbox 原稿的顺序。
 - [ ] Inbox 已按实际技术主题分类；同主题文件尽量同批处理，小类组合与单类超额豁免均有明确记录。
 - [ ] 主技术笔记不包含提交格式、联系邮箱、截止时间、课程宣传、网盘凭据或其他行政信息。
 - [ ] 作业题、技术练习与参考答案已移入 `00-课程与作业指南/`，且主技术笔记只保留必要的独立知识示例。
@@ -513,6 +508,6 @@ merge_target: null 或目标文件
 - [ ] 本次 Notes 入库后已同步更新根目录 `README.md`；Notes 文件数、README 笔记链接数和实际可解析目标完全一致。
 - [ ] `/Processing/`、`/Attachments/Processing/`、`/.obsidian/` 与 `/Notes/**/00-课程与作业指南/` 已被 Git 忽略，README 未列出私人课程资料，Git 索引中没有应排除的隐私文件。
 - [ ] 用户本轮新增的通用格式、目录、附件或工作流要求已自动合并进 `AGENTS.md`。
-- [ ] `Processing/02-Processed/` 只保留最近 3 个已完成批次；任何旧批次清理都经过精确确认并优先采用可恢复方式。
+- [ ] `Processing/02-Processed/` 未写入新批次，既有历史内容未经用户单独授权没有被改动。
 
 任何一项未通过，都不能宣称整理完成；必须修正或在“不确定事项（Open Questions）”中明确报告。
