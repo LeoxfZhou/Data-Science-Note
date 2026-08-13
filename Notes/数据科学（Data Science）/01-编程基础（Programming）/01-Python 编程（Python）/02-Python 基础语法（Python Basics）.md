@@ -8,13 +8,30 @@ detail_level: comprehensive
 merge_policy: union-zero-loss
 reviewed_at: 2026-08-11
 published_at: 2026-08-11
-source:
-  - Processing/02-Processed/2026-08-11-Python编程/originals/数据科学（Data Science）/01-编程基础（Programming）/01-Python 编程（Python）/基础语法.md
+updated_at: 2026-08-14
 ---
 
 # Python 基础语法（Python Basics）
 ## 1. 基础概念、变量与输入输出（Fundamentals, Variables, and I/O）
 ### 1.1 代码结构、命名、缩进与注释（Code Structure, Naming, Indentation, and Comments）
+#### 源码编码与关键字检查（Source Encoding and Keyword Inspection）
+
+Python 3 源文件默认使用 UTF-8 编码（Encoding）。只有确实需要其他编码时，才在第一行或紧随 Shebang 的第二行写编码声明，例如 `# -*- coding: cp1252 -*-`；源码实际保存编码必须与声明一致，否则解释器可能无法解码文件。Python 3 允许非 ASCII 标识符（Identifier），但团队代码通常仍优先采用清晰的英文命名，以降低输入法、字体和跨语言协作成本。
+
+关键字（Keyword）会随 Python 版本演化，不应长期维护一份可能过时的手写列表。使用标准库 `keyword` 查询当前解释器：
+
+```python
+import keyword
+
+print(keyword.iskeyword("class"))  # True
+print(keyword.iskeyword("match"))  # False；当前是软关键字（Soft Keyword）
+print(keyword.issoftkeyword("match"))  # True
+print("yield" in keyword.kwlist)  # True
+```
+
+- `keyword.kwlist`：当前解释器全部关键字。
+- `keyword.softkwlist`：当前解释器全部软关键字；软关键字只在特定语法上下文中具有特殊含义。
+- `keyword.iskeyword(value)` 与 `keyword.issoftkeyword(value)`：分别判断普通关键字与软关键字。
 
 Python 使用缩进表示代码块，通常每层使用 4 个空格。不要混用 Tab 和空格。
 
@@ -499,6 +516,54 @@ print(complex(3.2))      # (3.2+0j)
 print(complex('3.2'))    # (3.2+0j)
 print(complex("3.2+4j")) # (3.2+4j)
 ```
+
+#### 标准库数学与伪随机工具（Standard-library Math and Pseudorandom Tools）
+
+`math` 处理实数数学函数与常量；复数运算使用 `cmath`。角度参与三角函数前通常需要先用 `math.radians()` 转为弧度（Radian）。
+
+```python
+import math
+
+print(math.ceil(4.1))  # 5
+print(math.floor(4.9))  # 4
+print(math.sqrt(81))  # 9.0
+print(math.log(100, 10))  # 2.0
+print(math.isclose(math.sin(math.radians(30)), 0.5))  # True
+print(math.hypot(3, 4))  # 5.0
+print(round(math.pi, 5))  # 3.14159
+```
+
+常用接口：
+- `math.ceil(x)` / `math.floor(x)`：分别向正无穷与负无穷方向取整。
+- `math.fabs(x)`：返回浮点绝对值；一般对象的绝对值使用内置 `abs()`。
+- `math.exp(x)`、`math.log(x, base)`、`math.log10(x)`、`math.sqrt(x)`：指数、对数与平方根。
+- `math.sin(x)`、`math.cos(x)`、`math.tan(x)` 及对应反函数：参数或结果以弧度表示。
+- `math.degrees(x)` / `math.radians(x)`：弧度与角度互转。
+- `math.pi` / `math.e`：圆周率与自然常数。
+
+`random` 是确定性的伪随机数生成器（Pseudorandom Number Generator），适合模拟、抽样和测试，不适合密码、令牌或安全验证码；安全随机值使用 `secrets`。
+
+```python
+import random
+
+rng = random.Random(42)  # 独立实例避免修改模块级全局随机状态，并让示例可复现。
+values = ["red", "green", "blue", "yellow"]
+
+print(rng.randrange(0, 10, 2))  # 0；从 range(0, 10, 2) 选择
+print(rng.randint(1, 6))  # 1；上下界都包含
+print(rng.choice(values))  # blue；从非空序列选择一个元素
+print(rng.sample(values, k=2))  # ['green', 'red']；无放回抽样
+rng.shuffle(values)  # 原地打乱并返回 None。
+print(values)  # ['yellow', 'red', 'blue', 'green']
+```
+
+- `random.random()`：返回满足 `0.0 <= x < 1.0` 的浮点数。
+- `random.randrange(start, stop, step)`：从对应 `range` 中选一个值，`stop` 不包含在内。
+- `random.randint(a, b)`：等价于 `randrange(a, b + 1)`，因此包含 `a` 和 `b`。
+- `random.choice(sequence)`：从非空序列选择一个元素；空序列会抛出 `IndexError`。
+- `random.sample(population, k)`：无放回抽样并返回新列表；`k` 大于总体长度时抛出 `ValueError`。
+- `random.shuffle(sequence)`：原地打乱可变序列，不返回打乱后的副本。
+- `random.uniform(a, b)`：从两个边界之间抽取浮点数；受浮点舍入影响，端点是否出现取决于计算结果。
 
 ---
 ### 2.5 字符串（String）
@@ -2298,6 +2363,41 @@ def read_batches(items, batch_size: int):
 
 生成器 (Generator)通常只能消费一次；需要重复遍历时重新创建生成器 (Generator)或保存结果。
 
+#### `StopIteration`、`for` 循环与 `generator.send()`
+
+迭代器耗尽时，`next()` 会抛出 `StopIteration`；`for` 循环内部会捕获该异常并正常结束。迭代器的 `__iter__()` 返回自身，因此它既能被 `next()` 推进，也能直接交给 `for`。
+
+```python
+iterator = iter([10, 20])
+
+print(iter(iterator) is iterator)  # True
+print(next(iterator))  # 10
+print(next(iterator))  # 20
+print(next(iterator, "结束"))  # 结束；默认值可避免 StopIteration 向外传播
+```
+
+`generator.send(value)` 会恢复生成器，并让暂停位置的 `yield` 表达式得到 `value`。生成器尚未运行到第一个 `yield` 时没有接收位置，因此首次启动只能调用 `next(generator)` 或 `generator.send(None)`。
+
+```python
+def accumulator():
+    total = 0
+    while True:
+        value = yield total
+        if value is None:
+            return total
+        total += value
+
+
+generator = accumulator()
+print(next(generator))  # 0；先运行到第一个 yield
+print(generator.send(5))  # 5；5 成为 yield 表达式的结果
+print(generator.send(3))  # 8
+generator.close()  # 在暂停点抛出 GeneratorExit，用于主动结束生成器。
+```
+
+> [!warning] 首次发送非 `None` 值
+> 对刚创建的生成器直接调用 `generator.send(5)` 会抛出 `TypeError`。`send()` 的返回值是生成器下一次 `yield` 产生的值；若生成器在此之前结束，则会抛出 `StopIteration`。
+
 ### 5.6 命名空间（Namespace）
 命名空间 (Namespace)是名字到对象的映射。Python 中大多数命名空间 (Namespace)都是通过字典 (Dictionary)实现的。
 #### 1. 分类
@@ -2390,8 +2490,15 @@ outer()
 - [ ] 能正确使用切片 (Slicing)、解包、`enumerate` 和 `zip`。
 - [ ] 能编写带类型提示、边界检查和清晰返回值 (Return Value)的函数 (Function)。
 - [ ] 能避免覆盖内置名称、可变默认参数 (Default Parameter)和错误 (Error)使用 `is`。
+- [ ] 能用 `keyword` 查询当前解释器的关键字 (Keyword)与软关键字 (Soft Keyword)。
+- [ ] 能区分 `math`、`random` 与 `secrets` 的用途和安全边界。
+- [ ] 能解释迭代器耗尽、`StopIteration` 以及 `generator.send()` 的首次启动约束。
 
 ## 参考资料（References）
 
 - [Python 官方教程](https://docs.python.org/3/tutorial/)
 - [Python 风格指南 PEP 8](https://peps.python.org/pep-0008/)
+- [Python 标准库：`keyword`](https://docs.python.org/3/library/keyword.html)
+- [Python 标准库：`math`](https://docs.python.org/3/library/math.html)
+- [Python 标准库：`random`](https://docs.python.org/3/library/random.html)
+- [Python 语言参考：Yield expressions](https://docs.python.org/3/reference/expressions.html#yield-expressions)

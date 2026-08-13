@@ -7,8 +7,7 @@ detail_level: comprehensive
 merge_policy: union-zero-loss
 reviewed_at: 2026-08-11
 published_at: 2026-08-11
-source:
-  - Processing/02-Processed/2026-08-11-Python编程/originals/数据科学（Data Science）/01-编程基础（Programming）/01-Python 编程（Python）/文件、路径操作、模块与包.md
+updated_at: 2026-08-14
 ---
 
 # 文件、路径 (Path)、模块 (Module)与包（Files Paths Modules and Packages）
@@ -43,6 +42,27 @@ from collections import Counter as FrequencyCounter
 - 模块 (Module)可以被别的程序引入，以使用该模块 (Module)中定义的变量 (Variable)，函数 (Function)等功能。
 - 习惯上（但不强制要求）把所有导入语句放在模块 (Module)的开头。
 - 一个模块 (Module)被另一个程序第一次导入时，会执行该模块 (Module)。
+#### 导入缓存与 `sys.modules`（Import Cache and `sys.modules`）
+
+执行 `import module_name` 时，Python 会先检查 `sys.modules`。如果名称已经映射到一个模块对象，通常直接复用该对象，不再重新查找和执行模块顶层代码；未命中缓存时才调用导入协议查找、创建并执行模块。
+
+```python
+import math
+import sys
+
+cached_math = sys.modules["math"]
+import math as imported_again
+
+print(cached_math is imported_again)  # True
+print("math" in sys.modules)  # True
+```
+
+- `sys.modules` 是“完整模块名 → 模块对象”的可写字典，但业务代码不应随意删除或替换其中的条目。
+- 删除缓存键不保证旧模块对象立即销毁，因为其他名称可能仍引用它；随后重新导入还可能得到另一个模块对象。
+- 开发时确需重新执行模块代码，应明确使用 `importlib.reload(module)`；它会复用模块对象并重新执行模块代码，但旧外部引用、导入副作用与状态重建仍需谨慎处理。
+
+> [!tip] 大白话理解（Plain-language Intuition）
+> `sys.modules` 像本次 Python 进程的“已加载模块登记表”。重复 `import` 通常先查登记表并拿回同一个对象，所以模块顶层代码一般不会因同一进程中的普通重复导入而一遍遍执行。
 #### 1. 导入语法
 
 ```Python
@@ -54,6 +74,31 @@ from module import *
 ```
 
 **注意**：请慎用 `from module import *`，很容易出现名称重复的情况，导致出现一些意外的问题。
+#### `__all__` 与星号导入（`__all__` and Wildcard Import）
+
+模块可以使用字符串列表 `__all__` 声明 `from module import *` 应导出的公开名称：
+
+```python
+# metrics.py
+__all__ = ["accuracy"]
+
+
+def accuracy(correct: int, total: int) -> float:
+    if total <= 0:
+        raise ValueError("total 必须大于 0")
+    return correct / total
+
+
+def _validate_count(value: int) -> None:
+    if value < 0:
+        raise ValueError("计数不能为负数")
+```
+
+- `__all__` 中应写名称字符串，不是函数或变量对象。
+- 对普通模块执行星号导入且未定义 `__all__` 时，通常导入不以下划线开头的名称。
+- 对包执行星号导入时，`package.__all__` 还可列出应导入的子模块；未声明时，Python 不会为了星号导入而扫描文件系统中的全部子模块。
+- `__all__` 只控制星号导入的公开表面，不构成访问控制；仍可显式导入未列出的名称。
+- 生产代码仍优先显式导入，因为读者能直接看出名称来源，静态检查和重构也更可靠。
 ---
 ### 三、 包的概念 (Package Concept)
 #### 推荐项目结构
@@ -640,6 +685,8 @@ with open(r'./t01.txt', mode='w') as file:
 
 - [ ] 能解释模块 (Module)、导入包和发行包 (Distribution Package)的区别。
 - [ ] 能解释 `__name__ == "__main__"` 的用途。
+- [ ] 能解释 `sys.modules` 导入缓存，并知道何时使用 `importlib.reload()`。
+- [ ] 能说明 `__all__` 对普通模块和包的星号导入分别有什么作用。
 - [ ] 能用 `Path` 创建、组合 (Composition)、检查和遍历路径 (Path)。
 - [ ] 能正确选择文本/二进制模式和文件打开模式。
 - [ ] 知道相对路径 (Path)为什么会随工作目录变化。
@@ -647,5 +694,6 @@ with open(r'./t01.txt', mode='w') as file:
 ### 参考资料
 
 - [Python 官方教程：Modules](https://docs.python.org/3/tutorial/modules.html)
+- [Python 语言参考：The import system](https://docs.python.org/3/reference/import.html)
 - [Python 标准库：pathlib](https://docs.python.org/3/library/pathlib.html)
 - [Python 官方教程：Reading and Writing Files](https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files)
