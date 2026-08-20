@@ -10,6 +10,63 @@ published_at: 2026-08-13
 
 > [!warning] Transformers 接口边界（Transformers API Boundary）
 > `pytorch_pretrained_bert` 与早期模型专用类属于历史接口；现代代码优先使用 `transformers` 的 `AutoTokenizer` 与任务对应的 `AutoModelFor...`。模型加载契约以 [Hugging Face 官方模型文档](https://huggingface.co/docs/transformers/en/models)为准。
+## Hugging Face 现代生态与模型加载（Modern Ecosystem and Model Loading）
+> [!tip] 大白话理解（Plain-language Intuition）
+> Hugging Face Hub 像模型、数据集与演示应用的“软件仓库”；Transformers、Tokenizers 和 Datasets 则是把仓库资源接入 Python 项目的工具。`AutoModel` 根据配置自动选择正确骨架，`from_pretrained()` 再把训练好的权重装进去。
+### 1. 生态组成（Ecosystem Components）
+- **Hugging Face Hub**：集中托管模型（Model）、数据集（Dataset）和应用（Space），支持按模型卡（Model Card）、数据集卡（Dataset Card）、许可证（License）与任务标签检索。
+- **Transformers**：统一加载和调用文本、视觉、语音与多模态预训练模型（Pretrained Model）。
+- **Tokenizers**：完成规范化（Normalization）、分词（Tokenization）、Token-ID 映射、特殊 Token、填充（Padding）、截断（Truncation）与辅助掩码生成。
+- **Datasets**：加载、清洗、切分、映射、缓存与持久化数据集，并可衔接 PyTorch `DataLoader`。
+
+![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/04-自然语言处理（Natural Language Processing）/03-工具与框架（Tools and Frameworks）/05-Hugging Face Transformers（Hugging Face Transformers）/05-Hugging Face Transformers（Hugging Face Transformers）-2026082011500001.png]]
+
+![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/04-自然语言处理（Natural Language Processing）/03-工具与框架（Tools and Frameworks）/05-Hugging Face Transformers（Hugging Face Transformers）/05-Hugging Face Transformers（Hugging Face Transformers）-2026082011500002.png]]
+### 2. `AutoModel` 与任务头（Task Head）
+- `AutoModel` 加载不带任务头的主干模型（Backbone），主要输出隐藏状态（Hidden State），适合特征提取或自定义下游网络。
+- `AutoModelFor...` 在主干上附带任务头，例如序列分类、Token 分类、抽取式问答、因果语言建模或序列到序列语言建模。
+- 架构（Architecture）描述网络骨架；检查点（Checkpoint）包含某次训练得到的配置与权重。BERT 是架构，`google-bert/bert-base-chinese` 是具体检查点。
+
+|自动模型类（Auto Class）|任务（Task）|典型输出（Typical Output）|
+|---|---|---|
+|`AutoModel`|特征提取、自定义任务|最后隐藏状态等主干输出|
+|`AutoModelForSequenceClassification`|情感、主题、多标签分类|每个样本的类别 logits|
+|`AutoModelForTokenClassification`|命名实体识别（NER）等 Token 级标注|每个 Token 的类别 logits|
+|`AutoModelForQuestionAnswering`|抽取式问答|答案起点与终点 logits|
+|`AutoModelForCausalLM`|自回归生成（Autoregressive Generation）|下一 Token 的词表 logits|
+|`AutoModelForSeq2SeqLM`|翻译、摘要等序列到序列生成|解码端词表 logits|
+
+```python
+from transformers import AutoModel, AutoModelForSequenceClassification
+
+checkpoint = "google-bert/bert-base-chinese"
+
+# 主干模型不包含分类输出层，适合抽取上下文特征。
+backbone = AutoModel.from_pretrained(checkpoint)
+
+# 任务模型会额外构造三分类任务头；首次运行通常需要联网下载并写入缓存。
+classifier = AutoModelForSequenceClassification.from_pretrained(
+    checkpoint,
+    num_labels=3,
+)
+```
+### 3. `from_config()` 与 `from_pretrained()` 的区别
+- `from_config(config)` 只根据配置实例化架构，参数通常是随机初始化，不能把它误当成已经学到语言知识的模型。
+- `from_pretrained(checkpoint)` 同时读取配置并加载预训练权重；若本地缓存已有完整文件，可直接复用缓存。
+- 本地目录加载要求配置、权重以及模型所需的其他文件彼此匹配。目录残缺、模型类与任务头不匹配或权重形状不同，都会导致加载警告或错误。
+> [!warning] 安全边界（Security Boundary）
+> 官方文档说明，在可用时优先加载 `safetensors` 权重。仅在信任模型仓库代码时才启用 `trust_remote_code=True`，因为它允许执行仓库提供的自定义 Python 代码。
+### 4. 模型输入与输出（Model Inputs and Outputs）
+- 模型本质上是 `torch.nn.Module`；调用 `model(**batch)` 会进入其 `forward()`。
+- 常见输入包括 `input_ids`、`attention_mask`，部分模型还使用 `token_type_ids`、`position_ids`、`labels` 或缓存相关参数。
+- 不同模型类返回不同的模型输出对象（Model Output）。应读取字段名，例如 `last_hidden_state`、`logits`、`loss`，避免依赖不稳定的元组位置。
+- 传入 `labels` 时，任务模型通常会同时返回损失（Loss）和 logits；标签形状、数据类型及取值范围必须符合具体任务头要求。
+
+![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/04-自然语言处理（Natural Language Processing）/03-工具与框架（Tools and Frameworks）/05-Hugging Face Transformers（Hugging Face Transformers）/05-Hugging Face Transformers（Hugging Face Transformers）-2026082011500003.png]]
+
+- BERT 主干接口：[BertModel.forward](https://huggingface.co/docs/transformers/model_doc/bert#transformers.BertModel.forward)。
+- BERT 分类接口：[BertForSequenceClassification.forward](https://huggingface.co/docs/transformers/model_doc/bert#transformers.BertForSequenceClassification.forward)。
+- Tokenizer 与 Datasets 的完整数据管线见 [[06-Hugging Face Tokenizer 与 Datasets 数据管线（Hugging Face Tokenizer and Datasets Pipeline）]]。
 
 ## Transformers库使用
 > [!tip] 大白话理解（Plain-language Intuition）

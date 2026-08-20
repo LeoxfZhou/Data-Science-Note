@@ -492,3 +492,79 @@ $ tensorboard --logdir=runs --host 0.0.0.0
 > - 浏览器展示并可以使用右侧近邻词汇功能检验效果:
 
 ![[Attachments/Notes/数据科学（Data Science）/03-深度学习（Deep Learning）/04-自然语言处理（Natural Language Processing）/01-序列模型（Sequence Models）/02-文本向量表示与 Word2Vec（Text Vectorization and Word2Vec）/02-文本向量表示与 Word2Vec（Text Vectorization and Word2Vec）-20260813120000015.png]]
+## Gensim Word2Vec 词向量的加载、训练与迁移（Gensim Word2Vec Loading, Training, and Transfer）
+> [!tip] 大白话理解（Plain-language Intuition）
+> `KeyedVectors` 是“只负责查词向量的字典”，适合加载别人已经训练好的向量；`Word2Vec` 还包含训练状态，适合在自己的语料上继续学习。训练结束后只需查询向量时，保存 `model.wv` 更轻量。
+### 1. Word2Vec 文本格式（Word2Vec Text Format）
+- 第一行通常是 `<词汇总数> <向量维度>`。
+- 后续每行是一个词及其向量分量：`word value_1 value_2 ... value_n`。
+- 文本格式便于检查但体积大；二进制格式（Binary Format）加载更快，读取时必须让 `binary` 参数与文件实际格式一致。
+### 2. 加载公开词向量（Loading Pretrained Vectors）
+```python
+from gensim.models import KeyedVectors
+
+vectors = KeyedVectors.load_word2vec_format(
+    "sgns.weibo.word.bz2",
+    binary=False,
+)
+
+print(vectors.vector_size)  # 300，具体值取决于文件
+print(vectors.similarity("地铁", "公交"))  # 浮点相似度，结果取决于所加载的向量
+print(vectors.most_similar("地铁", topn=3))  # 三个最相近词及其余弦相似度
+```
+- `vectors[word]` 返回该词的稠密向量（Dense Vector）。词不在词表中时会抛出 `KeyError`，工程代码应先使用 `word in vectors.key_to_index` 检查。
+- `similarity(a, b)` 计算两个词向量的余弦相似度（Cosine Similarity）；接近 `1` 表示方向相近，接近 `-1` 表示方向相反，但它不等同于严格的人类语义判断。
+- `most_similar()` 支持正向词与负向词组合，可做类比查询；结果会继承训练语料中的偏差（Bias）。
+### 3. 在自有语料上训练（Training on a Custom Corpus）
+```python
+import jieba
+import pandas as pd
+from gensim.models import Word2Vec
+
+data = pd.read_csv("reviews.csv", encoding="utf-8", usecols=["review"])
+sentences = [
+    [token for token in jieba.lcut(review) if token.strip()]
+    for review in data["review"].dropna()
+]
+
+model = Word2Vec(
+    sentences=sentences,
+    vector_size=100,  # 每个词向量的维度；越大表达容量越高，内存和样本需求也越大。
+    window=5,         # 中心词左右最多观察多少个上下文位置。
+    min_count=2,      # 低于该频次的词不进入词表，减少噪声和内存占用。
+    sg=1,             # 1 表示 Skip-gram；0 表示 CBOW。
+    workers=4,        # 并行训练线程数；多线程可能使逐次结果不完全可复现。
+    seed=42,
+)
+
+# 保存为通用 Word2Vec 格式；磁盘写入属于外部副作用，不提供固定输出。
+model.wv.save_word2vec_format("my_vectors.kv", binary=False)
+```
+- **Skip-gram**：用中心词预测上下文，通常更关注低频词，但训练较慢。
+- **CBOW**：用上下文预测中心词，训练通常更快，对高频模式较稳定。
+- `min_count` 过高会删除有价值的领域术语；过低会扩大词表并把拼写噪声引入模型。
+### 4. 初始化 PyTorch 嵌入层（Initializing a PyTorch Embedding）
+```python
+import torch
+from torch import nn
+
+word_to_index = vectors.key_to_index
+embedding_matrix = torch.tensor(vectors.vectors, dtype=torch.float32)
+
+embedding = nn.Embedding.from_pretrained(
+    embedding_matrix,
+    freeze=False,  # False 允许下游任务继续微调；True 可保留原向量并减少可训练参数。
+)
+
+tokens = ["我", "喜欢", "地铁"]
+missing = [token for token in tokens if token not in word_to_index]
+if missing:
+    raise KeyError(f"词表中缺少 Token：{missing}")
+
+token_ids = torch.tensor([[word_to_index[token] for token in tokens]])
+embedded = embedding(token_ids)
+print(embedded.shape)  # torch.Size([1, 3, 300])，末维取决于 vectors.vector_size
+```
+- `freeze=True` 适合小数据或希望固定通用语义的场景；`freeze=False` 允许适配当前任务，但学习率过大会破坏已有语义结构。
+- 预训练词表通常没有专用的填充 Token（Padding Token）和未知 Token（Unknown Token）；构建下游词表时应明确这些行的索引、初始化方式与 `padding_idx`。
+- 如果重新排列词表，必须同步重排向量矩阵；只复制向量而沿用另一套 Token-ID 映射会造成静默语义错位。
