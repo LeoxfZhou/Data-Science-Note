@@ -874,17 +874,21 @@ https://user.17k.com/
 
 **2.2 通过修改settings中DEFAULT_REQUEST_HEADERS携带cookie**
 
-settings.py
+`settings.py`
 
 ```python
+import os
+
 DEFAULT_REQUEST_HEADERS = {
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-  'Accept-Language': 'en',
-  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36',
-  'Cookie': 'ASP.NET_SessionId=n4lwamv5eohaqcorfi3dvzcv; xiaohua_visitfunny=103174; xiaohua_web_userid=120326; xiaohua_web_userkey=r2sYazfFMt/rxUn8LJDmUYetwR2qsFCHIaNt7+Zpsscpp1p6zicW4w=='
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en",
+    "User-Agent": "Mozilla/5.0",
+    "Cookie": os.environ["SCRAPY_LOGIN_COOKIE"],
 }
 ```
 
+> [!warning] 凭据安全（Credential Security）
+> `SCRAPY_LOGIN_COOKIE` 必须由本地环境或部署平台注入。不得把真实 Session ID、用户 ID、用户 Key 或完整 Cookie 写入 `settings.py`、笔记、日志和 Git。
 注意：需要打开COOKIES_ENABLED，否则上面设定的cookie将不起作用
 
 ```python

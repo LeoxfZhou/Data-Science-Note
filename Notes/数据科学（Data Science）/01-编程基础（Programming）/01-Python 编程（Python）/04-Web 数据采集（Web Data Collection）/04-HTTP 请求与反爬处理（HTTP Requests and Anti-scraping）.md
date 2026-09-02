@@ -503,49 +503,48 @@ print(res.content.decode())
 ```
 
 ### 2-2  处理cookie
+> [!warning] 凭据安全（Credential Security）
+> 真实 Cookie、用户标识和 Token 不得写入代码、笔记、日志或 Git。下面的示例从环境变量读取凭据；本地 `.env` 文件也必须被 Git 忽略，生产环境应使用部署平台的密钥管理能力。
 #### 2-2-1 带cookie的请求
-
 ```python
+import os
 import requests
 
-url = 'https://xueqiu.com/statuses/hot/listV2.json?since_id=-1&max_id=554225&size=15'
+url = "https://xueqiu.com/statuses/hot/listV2.json?since_id=-1&max_id=0&size=15"
 headers = {
-    'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
-    'Referer': 'https://xueqiu.com/',
-    ## 携带cookie信息
-    'Cookie':'cookiesu=121697804017738; device_id=2cb32776fe1f32adba3aefc52173bcdc; xq_a_token=e2f0876e8fd368a0be2b6d38a49ed2dd5eec7557; xqat=e2f0876e8fd368a0be2b6d38a49ed2dd5eec7557; xq_r_token=2a5b753b2db675b4ac36c938d20120660651116d; xq_id_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOi0xLCJpc3MiOiJ1YyIsImV4cCI6MTcwMDY5OTg3NSwiY3RtIjoxNjk4MjM4NzI4MTU4LCJjaWQiOiJkOWQwbjRBWnVwIn0.RtY0JREVs0R4s9sgP2RsybzTrLY7UD5dDElnpf16r7-F02lOLkU7mdgAm0HjvKvbcAYYeRyP6Ke6rdy3WfbFI-RlJwzxIo5wZ4ScGzy0Vj3VYKqsh7-Wx8MnzyRjVcJPtVUfBlN_Plj5nmxnQPykmZwKSRjKT02YBy2XH4OHNaN0sG1Rst37mAj2f42lTogbHdfZBsRUkweP-UezUkEyvSncUYIe9IAMZmHf7d5AQ94BK5h3nhSqy01KyyTf2aonnwWG7rNrOeuo7F28S50Wz-1JBKtbQYhRbOEZL2FVpizmpC_h98pYl3RtDBVvbiUEJPxx1-bRN6J78h3bduYu0w; u=121697804017738; Hm_lvt_1db88642e346389874251b5a1eded6e3=1697804019,1698238782;'
+    "User-Agent": "Mozilla/5.0",
+    "Referer": "https://xueqiu.com/",
+    "Cookie": os.environ["XUEQIU_COOKIE"],
 }
 
-# 再发请求。拿数据
-res = requests.get(url, headers=headers)
-print(res.json())
+# 网络响应依赖当前 Cookie 权限、服务状态和接口版本，不提供固定输出。
+response = requests.get(url, headers=headers, timeout=10)
+response.raise_for_status()
+data = response.json()
 ```
-
-#### 2-2-2, coocie的字典形式
-
-```Python
+#### 2-2-2 cookie的字典形式
+```python
+import os
 import requests
 
-# 携带cookie登录雪球网  抓取完善个人资料页面
+user_id = os.environ["XUEQIU_USER_ID"]
 headers = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36',
-    'Referer': 'https://xueqiu.com/u/1990923459',
-    'Host': 'xueqiu.com',
+    "User-Agent": "Mozilla/5.0",
+    "Referer": f"https://xueqiu.com/u/{user_id}",
+    "Host": "xueqiu.com",
 }
-url = 'https://xueqiu.com/users/connectnew?redirect=/setting/user'
-
 cookie_dict = {
-    'u': '1990923459',
-    'bid': '1f110dfd43538f4b8362dfcd21ffbb64_l27g4lfl',
-    'xq_is_login': '1',
-    'xq_r_token': '5dcbe83944f0b75325f91246061d4a2a01999367'
+    "u": user_id,
+    "bid": os.environ["XUEQIU_BID"],
+    "xq_is_login": "1",
+    "xq_r_token": os.environ["XUEQIU_R_TOKEN"],
 }
-res = requests.get(url, headers=headers, cookies=cookie_dict)
-with open('雪球网.html', 'w') as f:
-    f.write(res.content.decode('UTF-8'))
-    print(res.content.decode('UTF-8'))
-```
+url = "https://xueqiu.com/users/connectnew?redirect=/setting/user"
 
+# 网络响应依赖当前 Cookie 权限、服务状态和接口版本，不提供固定输出。
+response = requests.get(url, headers=headers, cookies=cookie_dict, timeout=10)
+response.raise_for_status()
+```
 #### 2-2-3 获取服务端返回的cookie
 
 ```Python

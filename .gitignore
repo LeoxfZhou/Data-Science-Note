@@ -14,9 +14,15 @@
 # copies referenced by published knowledge notes under Attachments/Notes are public.
 /Attachments/Processing/
 
+# Raw HTML imports and their attachments are source material retained only in
+# the local Vault after their knowledge has been absorbed into Notes.
+/HTML import/
+/Attachments/HTML import/
+
 # Course guides, assignment requirements, contact details, cloud-drive links,
 # access codes, and review-only material are local archives, not public notes.
 /Notes/**/00-课程与作业指南/
+/Attachments/Notes/**/00-课程与作业指南/
 
 # Python environments and caches should be rebuilt from dependency files.
 .venv/
