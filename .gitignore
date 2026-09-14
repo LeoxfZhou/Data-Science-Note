@@ -20,9 +20,10 @@
 /Attachments/HTML import/
 
 # Course guides, assignment requirements, contact details, cloud-drive links,
-# access codes, and review-only material are local archives, not public notes.
-/Notes/**/00-课程与作业指南/
-/Attachments/Notes/**/00-课程与作业指南/
+# access codes, and review-only material are local archives nested under each
+# topic overview, not public notes.
+/Notes/**/00-概览（Overview）/课程与作业资料（Course Materials）/
+/Attachments/Notes/**/00-概览（Overview）/课程与作业资料（Course Materials）/
 
 # Python environments and caches should be rebuilt from dependency files.
 .venv/

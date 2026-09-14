@@ -584,6 +584,38 @@ conda remove -n PY01 numpy
 
 1. **切换环境**：在 PyCharm 右下角点击当前解释器 (Interpreter)名称，可以快速在 Base 和其他虚拟环境 (Virtual Environment)间切换。
 
+### 七、 项目文件与 Conda 环境的关系
+- **项目文件（Project Files）**：`.py`、Notebook、配置、数据和测试等实际工作成果，保存在项目目录中。
+- **Conda 环境（Conda Environment）**：独立的 Python 解释器和依赖集合，通常位于 Conda 管理的 `envs` 目录中。
+- 激活环境不等于“进入项目目录”；`conda activate <name>` 主要改变当前 Shell 的命令解析，使 `python`、`pip` 等优先指向该环境。
+- 环境之间通常是并列关系，不是嵌套关系。`base`、`nlp-lab` 和 `cloud-api` 可以分别存在；前缀只表示当前 Shell 正在使用哪一个。
+- 同一项目文件可由不同环境运行，只要对应解释器版本和依赖兼容；同一环境也可以运行多个项目，但共享依赖容易造成版本冲突。
+> [!tip] 大白话理解（Plain-language Intuition）
+> 项目文件像菜谱，Conda 环境像一间配好工具和材料的厨房。激活环境只是决定当前用哪间厨房做菜，不会把菜谱搬进厨房，也不会让一个环境进入另一个环境。
+#### 7.1 验证实际解释器
+```python
+import sys
+
+print(sys.executable)  # 输出当前执行此文件的 Python 绝对路径
+```
+终端中可进一步核对：
+```bash
+command -v python
+python -m pip --version
+conda env list
+```
+不要只看命令行前缀或 IDE 显示名称；以 `sys.executable` 和 `python -m pip --version` 的实际路径为准。
+#### 7.2 安全退出与会话变量
+```bash
+conda deactivate
+exit
+```
+- `conda deactivate` 退出当前激活环境；若启用了自动激活 `base`，前缀可能回到 `(base)`。
+- 直接关闭 Terminal 通常不会损坏项目或环境，但正在运行的前台任务会被终止。
+- 使用 `export NAME=value` 设置的变量默认只存在于当前 Shell 及其子进程；关闭终端后通常消失。
+- 删除 Conda 环境不会删除项目目录中的代码，但会删除该环境内安装的解释器和包。删除前先确认没有把重要文件误放进环境目录。
+- API Key 等秘密适合临时会话变量或专用 Secret 管理，不应写入公开代码、Notebook 输出、日志或 Git。
+
 ## 进阶补充与核对（Advanced Supplements and Verification）
 ### 完成检查
 
